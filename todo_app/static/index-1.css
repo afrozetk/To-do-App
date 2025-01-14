@@ -1,0 +1,57 @@
+.box-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 20px; 
+    padding: 20px; 
+    max-width: 1200px; 
+    margin: 0 auto; 
+}
+
+.box0 {
+    background-color: rgb(234, 235, 255);
+    padding: 20px;
+    border: 2px groove blue;
+    text-align: center;
+    font-family: 'Trebuchet MS', sans-serif;
+    font-size: 16px;
+    overflow: hidden;
+    grid-column: 1 / -1; 
+    width: 100%; 
+}
+
+.box1, .box2, .box3, .box4, .box5, .box6 {
+    background-color: rgb(234, 235, 255);
+    padding: 20px;
+    border: 2px groove blue;
+    text-align: center;
+    font-family: 'Trebuchet MS', sans-serif;
+    font-size: 16px;
+    overflow: hidden;
+}
+
+/* Images */
+img {
+    height: 140px;
+    width: 110px;
+    float: left;
+    padding-right: 15px;
+}
+
+/* Responsive Design for Smaller Screens */ /* taken from ChatGPT to adjust for different screen sizes */
+@media (max-width: 768px) {
+    .box-container {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+    }
+    .box0 {
+        grid-column: 1 / -1; /* Ensures Box0 remains full-width on smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .box-container {
+        grid-template-columns: 1fr; /* 1 column on small screens */
+    }
+    .box0 {
+        grid-column: 1 / -1; /* Ensures Box0 remains full-width on smaller screens */
+    }
+}
