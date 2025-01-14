@@ -75,7 +75,7 @@ body {
     font-size: 14px;
 }
 
-/* Responsive Design */
+/* Responsive Design, from chatgpt*/
 @media (max-width: 768px) {
     .login-container {
         padding: 15px 20px;
