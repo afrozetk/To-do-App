@@ -1,0 +1,41 @@
+{% extends "base.html" %} <!-- Use shared styles and navbar -->
+
+{% block content %}
+    <h1>Create a new task</h1>
+    <form action="{% url 'create' %}" method="post">
+        {% csrf_token %}
+         <!-- Title Field -->
+         <div class="formgroup">
+            <label for="create_title" class="form-label">Title</label> <!-- Label above -->
+            {{ createform.title }}
+        </div>
+
+        <!-- Description Field -->
+        <div class="formgroup">
+            <label for="create_description" class="form-label">Description</label>
+            {{ createform.description }}
+        </div>
+
+        <!-- Due Date Field -->
+        <div class="formgroup">
+            <label for="create_due_date" class="form-label">Due Date</label>
+            {{ createform.due_date }}
+        </div>
+
+        <!-- Category Field -->
+        <div class="formgroup">
+            <label for="create_category" class="form-label">Category</label>
+            {{ createform.category }}
+        </div>
+<!-- 
+
+        <div class="formgroup">
+            <label for="create_team" class="form-label">Team</label>
+            {{ createform.team }}
+        </div> -->
+
+        <input type="button" class="btn btn-danger" value="Cancel" onclick="window.location.href = '/';">
+        <input type="submit" class="btn btn-success" value="Save">
+        
+</form>
+{% endblock %} 
