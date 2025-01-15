@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect,  get_object_or_404, redirect
 from django.http import HttpRequest, HttpResponse
 from .forms import CreateForm
-from .models import Create
+from .models import Todo
 
 # Define views here:
 
@@ -12,7 +12,7 @@ def about(request: HttpRequest) -> HttpResponse:
     return render(request, "about.html")
 
 def todo_list(request):
-    todos = Create.objects.all()  # Fetch all ToDo items from the database
+    todos = Todo.objects.all()  # Fetch all ToDo items from the database
     return render(request, 'todo_list.html', {'todos': todos})
 
 def todo_create(request: HttpRequest) -> HttpResponse:
@@ -29,7 +29,7 @@ def todo_create(request: HttpRequest) -> HttpResponse:
 
 
 def todo_edit(request, id):
-    todo=get_object_or_404(Create, id=id)
+    todo=get_object_or_404(Todo, id=id)
     if request.method == 'POST':
         form = CreateForm(request.POST, instance=todo)
         if form.is_valid():
