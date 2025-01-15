@@ -22,7 +22,7 @@ class Todo(models.Model):
     class TodoState(models.TextChoices):
         NOT_STARTED = "N", "Not Started"
         ACTIVE = "A", "Active"
-        PAUSED = "P" "Paused"
+        PAUSED = "P", "Paused"
         STOPPED = "S", "Stopped"
 
     title = models.CharField(max_length=100)
