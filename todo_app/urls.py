@@ -9,5 +9,12 @@ urlpatterns = [
     path("about/", views.about, name="about"),
     path("teams/new", views.createteam, name="createteam"),
     path("register/", views.register, name="register"),
-    path("teams/", views.teamdetails, name="teamdetails"),
+    # path("teams/", views.teamdetails, name="teamdetails"),
+    # new paths
+    path('teams/', views.teams_list, name='teams'),
+    path('teams/<int:team_id>/edit/', views.edit_team, name='edit_team'),
+    path('teams/<int:team_id>/', views.teamdetails, name='teamdetails'),
+    
 ]
+
+

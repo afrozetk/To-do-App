@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse
-from .forms import CreateTodoForm
-from .models import Todo
+from .forms import CreateTodoForm, TeamForm
+from .models import Todo, Team
 
 # Define views here:
 
@@ -36,20 +36,24 @@ def todo_edit(request, id):
             form.save()
             return redirect('todo_list')
     else:
-        form = CreateForm(instance=todo)
+        form = CreateTodoForm(instance=todo)
     return render(request, "edit.html", {'form': form, 'todo': todo})
 
         
-  
-def createteam(request: HttpRequest) -> HttpResponse:
+
+
+def createteam(request):
     if request.method == 'POST':
-        teamname = request.POST.get('teamname')
-        description = request.POST.get('description')
-        return redirect('teamdetails')
-    return render(request, "createteam.html")
-  
-def teamdetails(request: HttpRequest) -> HttpResponse:
-    return render(request, "teamdetails.html")
+        form = TeamForm(request.POST)
+        if form.is_valid():
+            # Save the team and redirect to the team details page
+            team = form.save()
+            return redirect('teamdetails', team_id=team.id)
+    else:
+        form = TeamForm()
+    
+    return render(request, 'createteam.html', {'form': form})
+
 
   
 def register(request: HttpRequest) -> HttpResponse:
@@ -59,3 +63,32 @@ def register(request: HttpRequest) -> HttpResponse:
       passwordconfirm = request.POST.get('passwordconfirm')
   return render(request, "register.html")
 
+def edit_team(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+    
+    if request.method == 'POST':
+        team.name = request.POST.get('teamname')
+        team.description = request.POST.get('description')
+        team.save()
+        return redirect('teamdetails', team_id=team.id)
+
+    return render(request, 'edit_team.html', {'team': team})
+
+
+def teams_list(request):
+    teams = Team.objects.all()
+    return render(request, "teams.html", {'teams': teams})
+
+def teamdetails(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+    
+    if request.method == 'POST':
+        form = TeamForm(request.POST, instance=team)
+        if form.is_valid():
+            form.save()
+            return redirect('teamdetails', team_id=team.id)
+    else:
+        form = TeamForm(instance=team)
+    
+    members = team.members.all()  # Assuming a related member model
+    return render(request, "teamdetails.html", {'team': team, 'members': members, 'form': form})
