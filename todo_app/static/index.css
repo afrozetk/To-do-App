@@ -14,6 +14,8 @@ body {
     padding: 10px 20px;
     background-color: #003366;
     color: white;
+    position: relative;
+    width: 100%;
 }
 
 .app-name {
@@ -30,7 +32,16 @@ body {
 
 .nav-links .login-button {
     font-weight: bold;
-    align-items: end;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    padding: 5px 10px;
+    border: 2px white;
+    border-radius: 5px;
+    background-color: transparent;
+    color: white;
+    text-decoration: none;
+
 }
 
 /* Main Content Styling */
