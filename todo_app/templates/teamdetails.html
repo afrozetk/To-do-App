@@ -1,0 +1,62 @@
+{% extends "base.html" %} 
+{% load static %}
+{% block content %}
+<form action="/teamdetails" method="POST">
+    {% csrf_token %}
+    <div class="container mt-5">
+
+        <div class="row mb-3">
+            <p>{{ team.name }}</p>
+        </div>
+
+        <div class="row mb-3">
+            <p>{{ team.description }}</p>
+        </div>
+
+        <div class="row mb-3">
+            <h4>Team Members</h4>
+            <div class="col">
+                <input type="text" id="member-input" class="form-control" placeholder="Add a member">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col">
+                <ul id="team-members-list" class="list-group">
+                    {% for member in team.members %}
+                        <li class="list-group-item">{{ member }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+
+    <div class="row mt-3"> 
+        <div class="col text-end"> 
+            <button type="button" class="btn btn-success" id="add-member-btn">Update</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='/'">Cancel</button>
+        </div>
+    </div>
+</form>
+
+<!-- Add JavaScript for dynamic member addition -- done using requesting AI for a section with 
+ team members populating to the right of the input field -->
+<script>
+    const memberInput = document.getElementById('member-input');
+    const addMemberBtn = document.getElementById('add-member-btn');
+    const membersList = document.getElementById('team-members-list');
+
+    addMemberBtn.addEventListener('click', function () {
+        const memberName = memberInput.value.trim();
+        if (memberName) {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item';
+            listItem.textContent = memberName;
+            membersList.appendChild(listItem);
+            memberInput.value = '';
+        }
+    });
+</script>
+
+{% endblock %}
