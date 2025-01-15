@@ -37,7 +37,7 @@ def todo_edit(request, id):
             return redirect('todo_list')
     else:
         form = CreateForm(instance=todo)
-        return render(request, "edit.html", {'form': form, 'todo': todo})
+    return render(request, "edit.html", {'form': form, 'todo': todo})
         
   
 def createteam(request: HttpRequest) -> HttpResponse:
