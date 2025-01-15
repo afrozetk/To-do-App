@@ -37,11 +37,7 @@ def todo_edit(request, id):
             return redirect('todo_list')
     else:
         form = CreateForm(instance=todo)
-<<<<<<< HEAD
     return render(request, "edit.html", {'form': form, 'todo': todo})
-
-=======
-        return render(request, "edit.html", {'form': form, 'todo': todo})
         
   
 def createteam(request: HttpRequest) -> HttpResponse:
@@ -61,4 +57,3 @@ def register(request: HttpRequest) -> HttpResponse:
       password = request.POST.get('password')
       passwordconfirm = request.POST.get('passwordconfirm')
   return render(request, "register.html")
->>>>>>> d6a5b51412f7037ea7fee172e2e299b804547d4f
