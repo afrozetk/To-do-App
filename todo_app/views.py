@@ -9,3 +9,9 @@ def index(request: HttpRequest) -> HttpResponse:
 
 def about(request: HttpRequest) -> HttpResponse:
     return render(request, "about.html")
+
+def createteams(request: HttpRequest) -> HttpResponse:
+    if request.method == 'POST':
+        teamname = request.POST.get('teamname')
+        description = request.POST.get('description')
+    return render(request, "createteams.html")
