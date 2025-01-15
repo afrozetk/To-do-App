@@ -1,0 +1,63 @@
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #003366;
+    color: white;
+}
+
+.app-name {
+    font-size: 24px;
+    margin: 0;
+}
+
+.nav-links a {
+    margin-left: 15px;
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+}
+
+.nav-links .login-button {
+    font-weight: bold;
+}
+
+/* Main Content Styling */
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 70px); /* Full height minus header */
+}
+
+.logo {
+    max-width: 300px;
+    max-height: 300px;
+    border: 2px solid #003366;
+    background-color: white;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .nav-links a {
+        display: block;
+        margin: 10px 0;
+    }
+}
