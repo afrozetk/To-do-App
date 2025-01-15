@@ -1,0 +1,130 @@
+{% extends "base.html" %} 
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'teams.css' %}" type="text/css">
+<style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #0073e6;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        header .right {
+            display: flex;
+            align-items: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        input, textarea, button {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background: #0073e6;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005bb5;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+
+</style>
+
+<div class="container">
+    <h1>Create a New Team</h1>
+    <form id="create-team-form">
+        <label for="team-name">Team Name</label>
+        <input type="text" id="team-name" placeholder="Enter team name" required>
+        <div id="team-name-error" class="error"></div>
+
+        <label for="description">Description</label>
+        <textarea id="description" placeholder="Enter team description" required></textarea>
+        <div id="description-error" class="error"></div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="button" id="cancel-btn">Cancel</button>
+            <button type="submit" id="save-btn">Save</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('create-team-form');
+    const teamNameInput = document.getElementById('team-name');
+    const descriptionInput = document.getElementById('description');
+    const teamNameError = document.getElementById('team-name-error');
+    const descriptionError = document.getElementById('description-error');
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // Clear previous errors
+        teamNameError.textContent = '';
+        descriptionError.textContent = '';
+
+        let hasError = false;
+
+        if (!teamNameInput.value.trim()) {
+            teamNameError.textContent = 'Team Name is required.';
+            hasError = true;
+        }
+
+        if (!descriptionInput.value.trim()) {
+            descriptionError.textContent = 'Description is required.';
+            hasError = true;
+        }
+
+        if (!hasError) {
+            alert('Team saved successfully!');
+            form.reset();
+        }
+    });
+
+    document.getElementById('cancel-btn').addEventListener('click', () => {
+        if (confirm('Are you sure you want to cancel?')) {
+            form.reset();
+        }
+    });
+</script>
+
+</body>
+</html>
+
+
+{% endblock %}
+
