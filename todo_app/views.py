@@ -1,6 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
-
 # Define views here:
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -10,11 +9,12 @@ def index(request: HttpRequest) -> HttpResponse:
 def about(request: HttpRequest) -> HttpResponse:
     return render(request, "about.html")
 
-def createteams(request: HttpRequest) -> HttpResponse:
+def createteam(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         teamname = request.POST.get('teamname')
         description = request.POST.get('description')
-    return render(request, "createteams.html")
+        return redirect('teamdetails')
+    return render(request, "createteam.html")
 
 def register(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
@@ -22,3 +22,6 @@ def register(request: HttpRequest) -> HttpResponse:
         password = request.POST.get('password')
         passwordconfirm = request.POST.get('passwordconfirm')
     return render(request, "register.html")
+
+def teamdetails(request: HttpRequest) -> HttpResponse:
+    return render(request, "teamdetails.html")
