@@ -1,20 +1,19 @@
 {% extends "base.html" %} 
 {% load static %}
 {% block content %}
+
 <form action="{% url 'createteam' %}" method="POST" >
     {% csrf_token %}
     <div class="container mt-5">
-
         <div class="row mb-3">
-                <h4>Team Name</h4>
-                <input type="text" name="teamname" placeholder="team name" required>
+            <h4>Team Name</h4>
+            <input type="text" name="teamname" placeholder="team name" required>
         </div>
 
         <div class="row mb-3">
-                <h4>Description</h4>
-                <input type="text" name="description" placeholder="description" required>
+            <h4>Description</h4>
+            <input type="text" name="description" placeholder="description" required>
         </div>
-        
     </div>
 
     <div class="row mt-3"> 
