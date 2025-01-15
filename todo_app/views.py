@@ -40,7 +40,7 @@ def todo_edit(request, id):
         return render(request, "edit.html", {'form': form, 'todo': todo})
         
   
- def createteam(request: HttpRequest) -> HttpResponse:
+def createteam(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         teamname = request.POST.get('teamname')
         description = request.POST.get('description')
