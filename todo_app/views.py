@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,  get_object_or_404, redirect
 from django.http import HttpRequest, HttpResponse
 from .forms import CreateForm
 from .models import Create
@@ -28,15 +28,15 @@ def todo_create(request: HttpRequest) -> HttpResponse:
     return render(request, 'create.html', {'form': form})
 
 
-# def todo_edit(request):
-#     if request.method == 'POST':
-#         form = createForm(request.POST, instance=todo)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('about')
-#         return render(request, "edit.html", {'form': form})
-#     else:
-#         form = createForm(instance=todo)
-#         return render(request, "edit.html", {'form': form})
+def todo_edit(request, id):
+    todo=get_object_or_404(Create, id=id)
+    if request.method == 'POST':
+        form = CreateForm(request.POST, instance=todo)
+        if form.is_valid():
+            form.save()
+            return redirect('todo_list')
+    else:
+        form = CreateForm(instance=todo)
+        return render(request, "edit.html", {'form': form, 'todo': todo})
 
         
