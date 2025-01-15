@@ -7,7 +7,7 @@ from django.utils import timezone
 class Todo(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    due_date = models.DateTimeField(default=timezone.now)
+    due_date = models.DateField()
     category = models.CharField(max_length=50,blank=True)
     team = models.CharField(max_length=50,blank=True)
 
