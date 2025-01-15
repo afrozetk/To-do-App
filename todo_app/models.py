@@ -8,15 +8,21 @@ class Team(models.Model):
     name = models.CharField(max_length=70)
     description = models.TextField()
 
+    def __str__(self):
+        return self.name
+
 class TeamMember(models.Model):
     name = models.CharField(max_length=70)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
 class Todo(models.Model):
     class TodoState(models.TextChoices):
         NOT_STARTED = "N", "Not Started"
         ACTIVE = "A", "Active"
-        PAUSED = "P" "Paused"
+        PAUSED = "P", "Paused"
         STOPPED = "S", "Stopped"
 
     title = models.CharField(max_length=100)

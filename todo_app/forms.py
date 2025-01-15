@@ -10,8 +10,7 @@ class CreateTodoForm(forms.ModelForm):
         # Referenced documentation and AI to figure out how to create a select field for forign key:
         team = forms.ModelChoiceField(
             queryset=Team.objects.all(),
-            empty_label="team",
-            to_field_name="name"
+            empty_label="team"
         )
 
         widgets = {

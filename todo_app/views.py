@@ -12,16 +12,16 @@ def about(request: HttpRequest) -> HttpResponse:
     return render(request, "about.html")
 
   
-def todo_list(request):
+def dashboard(request):
     todos = Todo.objects.all()  # Fetch all ToDo items from the database
-    return render(request, 'todo_list.html', {'todos': todos})
+    return render(request, 'dashboard.html', {'todos': todos})
 
 def todo_create(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = CreateTodoForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('todo_list')
+            return redirect('dashboard')
         else:
             print(form.errors)
     else:
@@ -34,11 +34,17 @@ def todo_edit(request, id):
         form = CreateTodoForm(request.POST, instance=todo)
         if form.is_valid():
             form.save()
-            return redirect('todo_list')
+            return redirect('dashboard')
     else:
         form = CreateTodoForm(instance=todo)
     return render(request, "edit.html", {'form': form, 'todo': todo})
         
+def todo_delete(request: HttpRequest, id) -> HttpResponse:
+    todo = Todo.objects.get(id=id)
+    if todo:
+        todo.delete()
+    return redirect('dashboard')
+
   
 def createteam(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':

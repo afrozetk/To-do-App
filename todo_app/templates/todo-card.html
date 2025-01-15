@@ -1,0 +1,52 @@
+<div class="card">
+    <div class="card-header">
+        {% if todo.state == "A" %}
+            {% comment %} Active - {{Time}} {% endcomment %}
+        {% elif todo.state == "P" %}
+            Paused - {% comment %} {% endcomment %}
+        {% elif todo.state == "S" %}
+            Stopped - {% comment %} {% endcomment %}
+        {% endif %}
+    </div>
+
+    <div class="card-body">
+        <h3 class="card-title">{{todo.title}}</h3>
+        <p class="card-text">{{todo.description}}</p>
+
+        {% if todo.state == "N" or todo.state == "S" %}
+            <a href="" class="btn btn-success">Start</a>
+        {% elif todo.state == "P" %}
+            <a href="}" class="btn btn-outline-success">Resume</a>
+        {% elif todo.state == "A" %}
+            <a href="" class="btn btn-outline-danger">Stop</a>
+            <a href="" class="btn btn-outline-warning">Pause</a>
+        {% endif %}
+
+        <a href="{% url 'edit' todo.id %}" class="btn btn-secondary">Edit</a>
+        <button type="button" 
+            class="btn btn-outline-danger" 
+            data-bs-toggle="modal" 
+            data-bs-target="#todo-delete-modal-{{todo.id}}">
+            Delete
+        </button>
+    </div>
+</div>
+
+<!-- Modal modified from bootstrap documentation example: https://getbootstrap.com/docs/5.3/components/modal/#live-demo -->
+<div class="modal fade" id="todo-delete-modal-{{todo.id}}" tabindex="-1" aria-labelledby="todoDeleteModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="todoDeleteModal">Delete?</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">Are you sure you wish to delete this item?</div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="{% url 'todo_delete' todo.id %}" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
