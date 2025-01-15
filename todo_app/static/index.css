@@ -24,7 +24,7 @@ body {
 }
 
 .nav-links a {
-    margin-left: 15px;
+    margin-right: 15px;
     text-decoration: none;
     color: white;
     font-size: 16px;
@@ -34,7 +34,7 @@ body {
     font-weight: bold;
     position: absolute;
     top: 10px;
-    right: 20px;
+    margin-right: 20px;
     padding: 5px 10px;
     border: 2px white;
     border-radius: 5px;
@@ -47,8 +47,8 @@ body {
 /* Main Content Styling */
 .logo-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: right;
+    align-items: right;
     height: calc(100vh - 70px); /* Full height minus header */
 }
 
