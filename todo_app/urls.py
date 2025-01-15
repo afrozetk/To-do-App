@@ -3,7 +3,10 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("about", views.about, name="about"),
+    path("todos/new/", views.todo_create, name="create"),
+    path("todos/", views.todo_list, name="todo_list"),
+    path("todos/<int:id>/edit/", views.todo_edit, name="edit"),
+    path("about/", views.about, name="about"),
     path("createteam", views.createteam, name="createteam"),
     path("register", views.register, name="register"),
     path("teamdetails", views.teamdetails, name="teamdetails"),

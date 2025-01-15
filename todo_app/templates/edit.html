@@ -1,0 +1,58 @@
+{% extends "base.html" %} <!-- Use shared styles and navbar -->
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Edit Task</h1>
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <form action="{% url 'edit' todo.id %}" method="POST" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <!-- Title Field -->
+                <div class="mb-3">
+                    <label for="id_title" class="form-label fw-bold">Title</label>
+                    {{ form.title}}
+                    {% if form.title.errors %}
+                        <div class="text-danger small">
+                            {{ form.title.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Description Field -->
+                <div class="mb-3">
+                    <label for="id_description" class="form-label fw-bold">Description</label>
+                    {{ form.description}}
+                </div>
+
+                <!-- Due Date Field -->
+                <div class="mb-3">
+                    <label for="id_due_date" class="form-label fw-bold">Due Date</label>
+                    {{ form.due_date}}
+                    {% if form.due_date.errors %}
+                        <div class="text-danger small">
+                            {{ form.due_date.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Category Field -->
+                <div class="mb-3">
+                    <label for="id_category" class="form-label fw-bold">Category</label>
+                    {{ form.category}}
+                </div>
+                <!-- Team Field -->
+                <div class="mb-3">
+                    <label for="id_team" class="form-label fw-bold">Team</label>
+                    {{ form.team}}
+                </div>
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-danger"  onclick="window.location.href='{% url 'todo_list' %}'">Cancel</button>
+                    <button type="submit" class="btn btn-success" >Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
