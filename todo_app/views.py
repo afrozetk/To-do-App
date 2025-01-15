@@ -15,3 +15,10 @@ def createteams(request: HttpRequest) -> HttpResponse:
         teamname = request.POST.get('teamname')
         description = request.POST.get('description')
     return render(request, "createteams.html")
+
+def register(request: HttpRequest) -> HttpResponse:
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        passwordconfirm = request.POST.get('passwordconfirm')
+    return render(request, "register.html")
