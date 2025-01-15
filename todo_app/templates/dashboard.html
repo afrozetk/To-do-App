@@ -13,7 +13,7 @@
                         <th>Due Date</th>
                         <th>Category</th>
                         <th>Team</th>
-                        <th>Actions</th> <!-- Add an Actions column -->
+                        <th>State</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -23,10 +23,11 @@
                             <td>{{ todo.description }}</td>
                             <td>{{ todo.due_date }}</td>
                             <td>{{ todo.category }}</td>
-                            <td>{{ todo.team }}</td>
+                            <td>{{ todo.team.name }}</td>
                             <!-- Add Edit button linking to the edit page -->
                             <td>
                                 <a href="{% url 'edit' todo.id %}" class="btn btn-warning btn-sm">Edit</a>
+                                
                             </td>
                         </tr>
                     {% empty %}
