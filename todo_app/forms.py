@@ -1,10 +1,15 @@
+
 from django import forms
+from .models import Create  
 
-class createForm(forms.Form):
-    title = forms.CharField(label='Title', max_length=200)
-    description = forms.CharField(label='Description', required=False)
-    due_date = forms.DateTimeField(label='Due Date')
-    category = forms.CharField(label='Category', max_length=50,required=False)
-    # teams = forms.ForeignKey(Team, on_delete=models.CASCADE,required=False)
-
-         
+class CreateForm(forms.ModelForm):
+    class Meta:
+        model = Create
+        fields = ['title', 'description', 'due_date', 'category', 'team']
+        widgets = {
+            'due_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'team': forms.Select(attrs={'class': 'form-control'})
+        }
