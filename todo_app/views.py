@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm
+from django.contrib import messages
 
 # Define views here:
 
@@ -32,3 +33,8 @@ def login_view(request):
         form = LoginForm()
 
     return render(request, 'login.html', {'form': form})
+
+def forgot_password(request):
+    if request.method == "POST":
+        return render(request, 'forgot_password.html', {'email': request.POST['email']})
+    return render(request, 'forgot_password.html')

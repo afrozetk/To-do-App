@@ -28,6 +28,9 @@
         </div>
         <button type="submit" class="submit-btn">Login</button>
     </form>
+    <div class="forgot-password">
+        <a href="{% url 'forgot_password' %}">Forgot Password?</a>
+    </div>
     {% if form.errors %}
         <div class="error-messages">
             <ul>
