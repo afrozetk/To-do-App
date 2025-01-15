@@ -3,6 +3,10 @@
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center mb-4">Your To-Do List</h1>
+    {% if todos %} <!-- Show create button if the list is NOT empty -->
+        <a href="{% url 'create' %}" class="btn btn-primary mb-3 ">Create ToDo</a>
+    {% endif %}
+
     <div class="card shadow-lg">
         <div class="card-body">
             <table class="table table-bordered">
@@ -14,6 +18,7 @@
                         <th>Category</th>
                         <th>Team</th>
                         <th>State</th>
+                        <th>Actions</th> <!-- Add an Actions column -->
                     </tr>
                 </thead>
                 <tbody>
@@ -24,15 +29,41 @@
                             <td>{{ todo.due_date }}</td>
                             <td>{{ todo.category }}</td>
                             <td>{{ todo.team.name }}</td>
-                            <!-- Add Edit button linking to the edit page -->
+                            <td>{{ todo.get_state_display }}</td>
+
                             <td>
-                                <a href="{% url 'edit' todo.id %}" class="btn btn-warning btn-sm">Edit</a>
-                                
+                                <a href="{% url 'edit' todo.id %}" class="btn btn-secondary">Edit</a>
+                                <button type="button" 
+                                    class="btn btn-outline-danger" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#todo-delete-modal-{{todo.id}}">
+                                    Delete
+                                </button>
                             </td>
                         </tr>
+
+                        <!-- Modal modified from bootstrap documentation example: https://getbootstrap.com/docs/5.3/components/modal/#live-demo -->
+                        <div class="modal fade" id="todo-delete-modal-{{todo.id}}" tabindex="-1" aria-labelledby="todoDeleteModal" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="todoDeleteModal">Delete?</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+
+                                    <div class="modal-body">Are you sure you wish to delete this item?</div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <a href="{% url 'todo_delete' todo.id %}" class="btn btn-danger">Delete</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     {% empty %}
                         <tr>
                             <td colspan="6" class="text-center">No ToDo items found.</td>
+                            <td colspan="1" class="text-center"><a href="{% url 'create' %}" class="btn btn-primary btn-sm">Create ToDo</a></td>
                         </tr>
                     {% endfor %}
                 </tbody>

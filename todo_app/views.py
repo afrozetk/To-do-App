@@ -39,6 +39,12 @@ def todo_edit(request, id):
         form = CreateTodoForm(instance=todo)
     return render(request, "edit.html", {'form': form, 'todo': todo})
         
+def todo_delete(request: HttpRequest, id) -> HttpResponse:
+    todo = Todo.objects.get(id=id)
+    if todo:
+        todo.delete()
+    return redirect('dashboard')
+
   
 def createteam(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
