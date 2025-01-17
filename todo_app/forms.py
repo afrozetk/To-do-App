@@ -1,7 +1,18 @@
-
 from django import forms
 from .models import Todo, Team, TeamMember
 
+class LoginForm(forms.Form):
+    username = forms.CharField(
+        max_length=150, 
+        required=True, 
+        widget=forms.TextInput(attrs={'placeholder': 'Enter your username'})
+    )
+    password = forms.CharField(
+        required=True, 
+        widget=forms.PasswordInput(attrs={'placeholder': 'Enter your password'})
+    )
+
+    
 class CreateTodoForm(forms.ModelForm):
     class Meta:
         model = Todo

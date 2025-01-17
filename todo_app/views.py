@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse
+from django.contrib.auth import authenticate, login
+from .forms import LoginForm
+from django.contrib import messages
 from .forms import CreateTodoForm
 from .models import Todo
 
@@ -10,12 +13,39 @@ def index(request: HttpRequest) -> HttpResponse:
 
 def about(request: HttpRequest) -> HttpResponse:
     return render(request, "about.html")
-
   
 def dashboard(request):
-    todos = Todo.objects.all()  # Fetch all ToDo items from the database
-    return render(request, 'dashboard.html', {'todos': todos})
+  todos = Todo.objects.all()  # Fetch all ToDo items from the database
+  return render(request, 'dashboard.html', {'todos': todos})
 
+
+def login(request: HttpRequest) -> HttpResponse:
+    return render(request, "login.html")
+
+#used chatgpt to help me with this code:
+def login_view(request):
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect("index")  # Redirect to the homepage or dashboard
+            else:
+                form.add_error(None, "Invalid username or password")
+    else:
+        form = LoginForm()
+
+    return render(request, 'login.html', {'form': form})
+
+def forgot_password(request):
+    if request.method == "POST":
+        return render(request, 'forgot_password.html', {'email': request.POST['email']})
+    return render(request, 'forgot_password.html')
+
+  
 def todo_create(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = CreateTodoForm(request.POST)
