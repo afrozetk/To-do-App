@@ -14,8 +14,6 @@ body {
     padding: 10px 20px;
     background-color: #003366;
     color: white;
-    position: relative;
-    width: 100%;
 }
 
 .app-name {
@@ -24,7 +22,7 @@ body {
 }
 
 .nav-links a {
-    margin-right: 15px;
+    margin-left: 15px;
     text-decoration: none;
     color: white;
     font-size: 16px;
@@ -32,23 +30,13 @@ body {
 
 .nav-links .login-button {
     font-weight: bold;
-    position: absolute;
-    top: 10px;
-    margin-right: 20px;
-    padding: 5px 10px;
-    border: 2px white;
-    border-radius: 5px;
-    background-color: transparent;
-    color: white;
-    text-decoration: none;
-
 }
 
 /* Main Content Styling */
 .logo-container {
     display: flex;
-    justify-content: right;
-    align-items: right;
+    justify-content: center;
+    align-items: center;
     height: calc(100vh - 70px); /* Full height minus header */
 }
 
