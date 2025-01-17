@@ -5,6 +5,8 @@
     padding: 20px; 
     max-width: 1200px; 
     margin: 0 auto; 
+    justify-content: center;
+    align-content: start;
 }
 
 .box0 {
@@ -32,7 +34,7 @@
 /* Images */
 img {
     height: 140px;
-    width: 110px;
+    width: 140px;
     float: left;
     padding-right: 15px;
 }
@@ -41,6 +43,7 @@ img {
 @media (max-width: 768px) {
     .box-container {
         grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+        justify-content: center;
     }
     .box0 {
         grid-column: 1 / -1; /* Ensures Box0 remains full-width on smaller screens */
