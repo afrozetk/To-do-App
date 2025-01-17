@@ -21,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_KEY", default="django-insecure-q(4l_coc&%3w!4s3)65-k1r_)l!ku+72ilzl=5__5w=*^q$lb-")
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ.get("DEBUG", default=False))
+DEBUG = bool(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
 
 
 # Application definition
@@ -76,10 +76,16 @@ WSGI_APPLICATION = 'todo_project.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+   'default': {
+         'ENGINE': 'django.db.backends.{}'.format(
+             os.getenv('DATABASE_ENGINE', 'sqlite3')
+         ),
+         'NAME': os.getenv('DATABASE_NAME', 'polls'),
+         'USER': os.getenv('DATABASE_USERNAME', 'myprojectuser'),
+         'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
+         'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
+         'PORT': os.getenv('DATABASE_PORT', 5432),
+     }
 }
 
 
