@@ -12,5 +12,5 @@ urlpatterns = [
     path("todos/<int:id>/edit/", views.todo_edit, name="edit"),
     path("todos/<int:id>/delete/", views.todo_delete, name="todo_delete"),
     path("teams/new", views.createteam, name="createteam"),
-    path("teams/", views.teamdetails, name="teamdetails"),
+    path("teams/<int:pk>/", views.teamdetails, name="teamdetails"),
 ]
