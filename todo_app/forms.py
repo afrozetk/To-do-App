@@ -31,3 +31,13 @@ class CreateTodoForm(forms.ModelForm):
             'category': forms.TextInput(attrs={'class': 'form-control'}),
             'team': forms.Select(attrs={'class': 'form-control'})
         }
+
+class TeamForm(forms.ModelForm):
+    class Meta:
+        model = Team
+        fields = ['name', 'description']
+
+class MemberForm(forms.ModelForm):
+    class Meta:
+        model = TeamMember
+        fields = ['name', 'team'] 
