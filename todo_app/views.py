@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse
 from django.contrib.auth import authenticate, login
-from .forms import LoginForm
+from .forms import LoginForm, CreateTodoForm, TeamForm, MemberForm
 from django.contrib import messages
-from .forms import CreateTodoForm
-from .models import Todo
+from .models import Todo, Team
 
 # Define views here:
 
@@ -78,13 +77,27 @@ def todo_delete(request: HttpRequest, id) -> HttpResponse:
   
 def createteam(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
-        teamname = request.POST.get('teamname')
-        description = request.POST.get('description')
-        return redirect('teamdetails')
-    return render(request, "createteam.html")
-  
-def teamdetails(request: HttpRequest) -> HttpResponse:
-    return render(request, "teamdetails.html")
+        form = TeamForm(request.POST)
+        if form.is_valid():
+            team=form.save()
+            return redirect('teamdetails', pk=team.id)
+    else:
+        form = TeamForm()
+    return render(request, 'createteam.html', {'form': form})
+
+def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
+    team = get_object_or_404(Team, pk=pk)
+    members = team.name
+    if request.method == 'POST':
+        form = MemberForm(request.POST)
+        if form.is_valid():
+            member = form.save(commit=False)
+            member.team = team
+            member.save()
+            return redirect('teamdetails', team.pk)
+    else:
+        form = MemberForm()
+    return render(request, 'teamdetails.html', {'team': team, 'members': members, 'form': form})
 
   
 def register(request: HttpRequest) -> HttpResponse:
