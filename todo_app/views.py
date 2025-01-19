@@ -5,6 +5,8 @@ from .forms import LoginForm
 from django.contrib import messages
 from .forms import CreateTodoForm
 from .models import Todo
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 
 # Define views here:
 
@@ -76,3 +78,32 @@ def register(request: HttpRequest) -> HttpResponse:
       password = request.POST.get('password')
       passwordconfirm = request.POST.get('passwordconfirm')
   return render(request, "register.html")
+
+#used chat gpt for this code
+def register_view(request):
+    if request.method == "POST":
+        email = request.POST.get('username')
+        password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        # Validate that passwords match
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return render(request, 'register.html')
+
+        # Validate email uniqueness
+        if User.objects.filter(username=email).exists():
+            messages.error(request, "Email is already registered.")
+            return render(request, 'register.html')
+
+        # Create the user
+        user = User.objects.create(
+            username=email,
+            password=make_password(password)  # Hash the password before saving
+        )
+
+        # Redirect to login page after successful registration
+        messages.success(request, "Account created successfully. Please log in.")
+        return redirect('login')  # Replace 'login' with your login page URL pattern name
+
+    return render(request, 'register.html')
