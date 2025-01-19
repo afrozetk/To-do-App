@@ -4,6 +4,8 @@ from django.contrib.auth import authenticate, login
 from .forms import LoginForm, CreateTodoForm, TeamForm, MemberForm
 from django.contrib import messages
 from .models import Todo, Team
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 
 # Define views here:
 
@@ -17,27 +19,26 @@ def dashboard(request):
   todos = Todo.objects.all()  # Fetch all ToDo items from the database
   return render(request, 'dashboard.html', {'todos': todos})
 
-
 def login(request: HttpRequest) -> HttpResponse:
-    return render(request, "login.html")
-
-#used chatgpt to help me with this code:
-def login_view(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
+            # Extract data from the form
+            user = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
+
+            # Authenticate the user
+            user = authenticate(request, password=password)
             if user is not None:
                 login(request, user)
-                return redirect("index")  # Redirect to the homepage or dashboard
+                messages.success(request, "Logged in successfully!")
+                return redirect("index")  # Redirect to your homepage or dashboard
             else:
-                form.add_error(None, "Invalid username or password")
+                messages.error(request, "Invalid email or password.")
     else:
         form = LoginForm()
-
-    return render(request, 'login.html', {'form': form})
+    
+    return render(request, "login.html", {"form": form})
 
 def forgot_password(request):
     if request.method == "POST":
@@ -101,8 +102,33 @@ def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
 
   
 def register(request: HttpRequest) -> HttpResponse:
-  if request.method == 'POST':
-      email = request.POST.get('email')
-      password = request.POST.get('password')
-      passwordconfirm = request.POST.get('passwordconfirm')
-  return render(request, "register.html")
+    if request.method == 'POST':
+        # Collect form data
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        passwordconfirm = request.POST.get('passwordconfirm')
+        
+        # Validate input
+        if not email or not password:
+            messages.error(request, "All fields are required.")
+            return render(request, "register.html")
+
+        if password != passwordconfirm:
+            messages.error(request, "Passwords do not match.")
+            return render(request, "register.html")
+        
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email already exists.")
+            return render(request, "register.html")
+        
+        # Create user
+        user = User.objects.create(
+            email=email,
+            password=make_password(password)  # Hash the password
+        )
+        user.save()
+        
+        messages.success(request, "Account created successfully. Please log in.")
+        return redirect('login')  # Redirect to login page after successful registration
+
+    return render(request, "register.html")
