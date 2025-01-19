@@ -75,6 +75,21 @@ body {
     font-size: 14px;
 }
 
+.register-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.register-btn:hover {
+    background-color: #0056b3;
+}
+
 /* Responsive Design, from chatgpt*/
 @media (max-width: 768px) {
     .login-container {
