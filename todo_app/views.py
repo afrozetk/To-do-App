@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, logout
 from .forms import LoginForm
 from django.contrib import messages
-from .forms import CreateTodoForm
+from .forms import CreateTodoForm, ResetPasswordForm
 from .models import Todo
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login as auth_login
+from django.core.exceptions import ObjectDoesNotExist
 
 # Define views here:
 
@@ -28,10 +29,37 @@ def login_view(request: HttpRequest) -> HttpResponse:
 
 
 def forgot_password(request):
-    if request.method == "POST":
-        return render(request, 'forgot_password.html', {'email': request.POST['email']})
-    return render(request, 'forgot_password.html')
+    if request.method == 'POST':
+        form = ResetPasswordForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            new_password = form.cleaned_data['new_password']
+            
+            # Check if email exists in the 'username' field
+            user = User.objects.filter(username=email).first()
+            if user:
+                # Update the user's password
+                user.password = make_password(new_password)
+                user.save()
 
+                # After saving the new password, redirect to the success page
+                return redirect('password_reset_success')
+            else:
+                form.add_error('email', 'No user found with this email address.')  # Add error if no user found
+        else:
+            print("Form errors:", form.errors)
+    else:
+        form = ResetPasswordForm()
+
+    return render(request, 'forgot_password.html', {'form': form}) 
+
+def password_reset_success(request):
+    # Your success page logic here
+    return render(request, 'password_reset_success.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login') 
   
 def todo_create(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
@@ -116,21 +144,21 @@ def register_view(request):
 #written based off chatgpt code
 def login_views(request):
     if request.method == "POST":
-        username = request.POST.get('username')  # Captures email as username
+        email = request.POST.get('username')  # Captures email as username
         password = request.POST.get('password')
         
-        print(f"Attempting to login with Username: {username} and Password: {password}")
+        print(f"Attempting to login with Email: {email} and Password: {password}")
 
         # Authenticate user
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(request, username=email, password=password)
         if user is not None:
-            print(f"Authentication successful for {username}")
+            print(f"Authentication successful for {email}")
             auth_login(request, user)  # Log the user in
             return redirect('dashboard_view')  # Redirect to the dashboard
         else:
-            print(f"Authentication failed for {username}")
+            print(f"Authentication failed for {email}")
             messages.error(request, "Invalid email or password. Please check your credentials and try again.")
-            print(f"Failed login attempt: {username} with password {password}")
+            print(f"Failed login attempt: {email} with password {password}")
             return render(request, "login.html")  # Stay on the login page if authentication fails
     
     return render(request, 'login.html')

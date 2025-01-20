@@ -1,5 +1,7 @@
 from django import forms
 from .models import Todo, Team, TeamMember
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 class LoginForm(forms.Form):
     username = forms.CharField(
@@ -31,3 +33,24 @@ class CreateTodoForm(forms.ModelForm):
             'category': forms.TextInput(attrs={'class': 'form-control'}),
             'team': forms.Select(attrs={'class': 'form-control'})
         }
+#copied from chatgpt
+class ResetPasswordForm(forms.Form):
+    email = forms.EmailField()  # User email input
+    new_password = forms.CharField(widget=forms.PasswordInput)
+    confirm_password = forms.CharField(widget=forms.PasswordInput)
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        # Look for the email in the 'username' field of User model
+        if not User.objects.filter(username=email).exists():
+            raise ValidationError("No user found with this email address.")
+        return email
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get("new_password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if new_password != confirm_password:
+            raise ValidationError("Passwords do not match.")
+        return cleaned_data
