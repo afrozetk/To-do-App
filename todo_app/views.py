@@ -84,10 +84,12 @@ def createteam(request: HttpRequest) -> HttpResponse:
     else:
         form = TeamForm()
     return render(request, 'createteam.html', {'form': form})
+        
 
 def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
+    # Get team by ID and it's associated members from the DB model:
     team = get_object_or_404(Team, pk=pk)
-    members = team.name
+    members = TeamMember.objects.filter(team=team)
     if request.method == 'POST':
         form = MemberForm(request.POST)
         if form.is_valid():
