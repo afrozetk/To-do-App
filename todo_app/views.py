@@ -3,7 +3,7 @@ from django.http import HttpRequest, HttpResponse
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, CreateTodoForm, TeamForm, MemberForm
 from django.contrib import messages
-from .models import Todo, Team
+from .models import Todo, Team, TeamMember
 
 # Define views here:
 
@@ -90,13 +90,16 @@ def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
     # Get team by ID and it's associated members from the DB model:
     team = get_object_or_404(Team, pk=pk)
     members = TeamMember.objects.filter(team=team)
+
     if request.method == 'POST':
-        form = MemberForm(request.POST)
+        # Create form model with the missing team foreign key so it validates properly.
+        form = MemberForm(
+            request.POST, 
+            instance=TeamMember(team=team)
+        )
         if form.is_valid():
-            member = form.save(commit=False)
-            member.team = team
-            member.save()
-            return redirect('teamdetails', team.pk)
+            form.save()
+        return redirect('teamdetails', team.pk)
     else:
         form = MemberForm()
     return render(request, 'teamdetails.html', {'team': team, 'members': members, 'form': form})
