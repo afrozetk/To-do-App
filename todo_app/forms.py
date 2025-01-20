@@ -31,3 +31,21 @@ class CreateTodoForm(forms.ModelForm):
             'category': forms.TextInput(attrs={'class': 'form-control'}),
             'team': forms.Select(attrs={'class': 'form-control'})
         }
+
+class TeamForm(forms.ModelForm):
+    class Meta:
+        model = Team
+        fields = ['name', 'description']
+
+class MemberForm(forms.ModelForm):
+    class Meta:
+        model = TeamMember
+        exclude = ['team'] # Exclude the team field from the form since it will be filled automatically in view.
+
+        # Define the widget styles/attributes for the form field: 
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'type': 'text', 
+                'class': 'form-control', 
+                'placeholder': 'Add a member'}
+        )}
