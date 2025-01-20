@@ -7,6 +7,8 @@ from .forms import CreateTodoForm
 from .models import Todo
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login as auth_login
 
 # Define views here:
 
@@ -16,12 +18,12 @@ def index(request: HttpRequest) -> HttpResponse:
 def about(request: HttpRequest) -> HttpResponse:
     return render(request, "about.html")
   
-def dashboard(request):
+def dashboard_view(request):
   todos = Todo.objects.all()  # Fetch all ToDo items from the database
   return render(request, 'dashboard.html', {'todos': todos})
 
 
-def login(request: HttpRequest) -> HttpResponse:
+def login_view(request: HttpRequest) -> HttpResponse:
     return render(request, "login.html")
 
 
@@ -97,13 +99,38 @@ def register_view(request):
             return render(request, 'register.html')
 
         # Create the user
-        user = User.objects.create(
-            username=email,
-            password=make_password(password)  # Hash the password before saving
-        )
+        try:
+            user = User.objects.create_user(username=email, password=password)
+            user.save()
+            print(f"User created: {user.username}")  # This will print to the console
+        except Exception as e:
+            print(f"Error creating user: {e}")  # If there's any error, it'll print here
+
 
         # Redirect to login page after successful registration
         messages.success(request, "Account created successfully. Please log in.")
         return redirect('login')  # Replace 'login' with your login page URL pattern name
 
     return render(request, 'register.html')
+
+#written based off chatgpt code
+def login_views(request):
+    if request.method == "POST":
+        username = request.POST.get('username')  # Captures email as username
+        password = request.POST.get('password')
+        
+        print(f"Attempting to login with Username: {username} and Password: {password}")
+
+        # Authenticate user
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            print(f"Authentication successful for {username}")
+            auth_login(request, user)  # Log the user in
+            return redirect('dashboard_view')  # Redirect to the dashboard
+        else:
+            print(f"Authentication failed for {username}")
+            messages.error(request, "Invalid email or password. Please check your credentials and try again.")
+            print(f"Failed login attempt: {username} with password {password}")
+            return render(request, "login.html")  # Stay on the login page if authentication fails
+    
+    return render(request, 'login.html')
