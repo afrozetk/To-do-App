@@ -3,9 +3,7 @@ from django.http import HttpRequest, HttpResponse
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, CreateTodoForm, TeamForm, MemberForm
 from django.contrib import messages
-from .models import Todo, Team
-from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password
+from .models import Todo, Team, TeamMember
 
 # Define views here:
 
@@ -19,26 +17,27 @@ def dashboard(request):
   todos = Todo.objects.all()  # Fetch all ToDo items from the database
   return render(request, 'dashboard.html', {'todos': todos})
 
+
 def login(request: HttpRequest) -> HttpResponse:
+    return render(request, "login.html")
+
+#used chatgpt to help me with this code:
+def login_view(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
-            # Extract data from the form
-            user = form.cleaned_data['email']
+            username = form.cleaned_data['username']
             password = form.cleaned_data['password']
-
-            # Authenticate the user
-            user = authenticate(request, password=password)
+            user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                messages.success(request, "Logged in successfully!")
-                return redirect("index")  # Redirect to your homepage or dashboard
+                return redirect("index")  # Redirect to the homepage or dashboard
             else:
-                messages.error(request, "Invalid email or password.")
+                form.add_error(None, "Invalid username or password")
     else:
         form = LoginForm()
-    
-    return render(request, "login.html", {"form": form})
+
+    return render(request, 'login.html', {'form': form})
 
 def forgot_password(request):
     if request.method == "POST":
@@ -85,50 +84,30 @@ def createteam(request: HttpRequest) -> HttpResponse:
     else:
         form = TeamForm()
     return render(request, 'createteam.html', {'form': form})
+        
 
 def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
+    # Get team by ID and it's associated members from the DB model:
     team = get_object_or_404(Team, pk=pk)
-    members = team.name
+    members = TeamMember.objects.filter(team=team)
+
     if request.method == 'POST':
-        form = MemberForm(request.POST)
+        # Create form model with the missing team foreign key so it validates properly.
+        form = MemberForm(
+            request.POST, 
+            instance=TeamMember(team=team)
+        )
         if form.is_valid():
-            member = form.save(commit=False)
-            member.team = team
-            member.save()
-            return redirect('teamdetails', team.pk)
+            form.save()
+        return redirect('teamdetails', team.pk)
     else:
         form = MemberForm()
     return render(request, 'teamdetails.html', {'team': team, 'members': members, 'form': form})
 
   
 def register(request: HttpRequest) -> HttpResponse:
-    if request.method == 'POST':
-        # Collect form data
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        passwordconfirm = request.POST.get('passwordconfirm')
-        
-        # Validate input
-        if not email or not password:
-            messages.error(request, "All fields are required.")
-            return render(request, "register.html")
-
-        if password != passwordconfirm:
-            messages.error(request, "Passwords do not match.")
-            return render(request, "register.html")
-        
-        if User.objects.filter(email=email).exists():
-            messages.error(request, "Email already exists.")
-            return render(request, "register.html")
-        
-        # Create user
-        user = User.objects.create(
-            email=email,
-            password=make_password(password)  # Hash the password
-        )
-        user.save()
-        
-        messages.success(request, "Account created successfully. Please log in.")
-        return redirect('login')  # Redirect to login page after successful registration
-
-    return render(request, "register.html")
+  if request.method == 'POST':
+      email = request.POST.get('email')
+      password = request.POST.get('password')
+      passwordconfirm = request.POST.get('passwordconfirm')
+  return render(request, "register.html")

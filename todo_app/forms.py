@@ -40,4 +40,12 @@ class TeamForm(forms.ModelForm):
 class MemberForm(forms.ModelForm):
     class Meta:
         model = TeamMember
-        fields = ['name', 'team'] 
+        exclude = ['team'] # Exclude the team field from the form since it will be filled automatically in view.
+
+        # Define the widget styles/attributes for the form field: 
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'type': 'text', 
+                'class': 'form-control', 
+                'placeholder': 'Add a member'}
+        )}
