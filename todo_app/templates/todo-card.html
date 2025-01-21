@@ -14,23 +14,25 @@
     <div class="card-body">
         <h3 class="card-title">{{todo.title}}</h3>
         <p class="card-text">{{todo.description}}</p>
-
-        {% if todo.state == "N" or todo.state == "S" %}
-            <a href="" class="btn btn-success">Start</a>
-        {% elif todo.state == "P" %}
-            <a href="}" class="btn btn-outline-success">Resume</a>
-        {% elif todo.state == "A" %}
-            <a href="" class="btn btn-outline-danger">Stop</a>
-            <a href="" class="btn btn-outline-warning">Pause</a>
-        {% endif %}
-
-        <a href="{% url 'edit' todo.id %}" class="btn btn-secondary">Edit</a>
-        <button type="button" 
-            class="btn btn-outline-danger" 
-            data-bs-toggle="modal" 
-            data-bs-target="#todo-delete-modal-{{todo.id}}">
-            Delete
-        </button>
+                <form action="{% url 'todo_setstate' todo.id %}" method="POST" class="col-auto me-auto">
+                    {% csrf_token %}
+            
+                    {% if todo.state == "N" or todo.state == "S" %}
+                        <button type="submit" name="state" value="A" class="btn btn-success">Start</button>
+                    {% elif todo.state == "P" %}
+                        <button type="submit" name="state" value="A" class="btn btn-outline-success">Resume</button>
+                    {% elif todo.state == "A" %}
+                        <button type="submit" name="state" value="S" class="btn btn-outline-danger">Stop</button>
+                        <button type="submit" name="state" value="P" class="btn btn-outline-warning">Pause</button>
+                    {% endif %}
+                </form>
+                    <a href="{% url 'edit' todo.id %}" class="btn btn-secondary">Edit</a>
+                    <button type="button"
+                        class="btn btn-outline-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#todo-delete-modal-{{todo.id}}">
+                        Delete
+                    </button>
     </div>
 </div>
 
