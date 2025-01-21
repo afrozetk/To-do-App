@@ -67,7 +67,15 @@ def todo_edit(request, id):
     else:
         form = CreateTodoForm(instance=todo)
     return render(request, "edit.html", {'form': form, 'todo': todo})
-        
+
+def todo_setstate(request: HttpRequest, id) -> HttpResponse:
+    if request.method == 'POST' and request.POST.get("state"):
+        todo = get_object_or_404(Todo, id=id)
+        todo.state = request.POST.get("state")
+        todo.save()
+    return redirect('dashboard')
+
+
 def todo_delete(request: HttpRequest, id) -> HttpResponse:
     todo = Todo.objects.get(id=id)
     if todo:
