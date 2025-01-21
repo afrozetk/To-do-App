@@ -14,4 +14,5 @@ urlpatterns = [
     path("todos/<int:id>/delete/", views.todo_delete, name="todo_delete"),
     path("teams/new", views.createteam, name="createteam"),
     path("teams/<int:pk>/", views.teamdetails, name="teamdetails"),
+    path('teams/<int:pk>/delete/', views.delete_team, name='delete_team'),
 ]

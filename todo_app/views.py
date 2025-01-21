@@ -112,10 +112,20 @@ def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
         form = MemberForm()
     return render(request, 'teamdetails.html', {'team': team, 'members': members, 'form': form})
 
-  
+def delete_team(request, pk):
+    # Get team by ID and it's associated members from the DB model:
+    team = get_object_or_404(Team, pk=pk)
+
+    if request.method == 'POST':
+        team.delete()
+        return redirect('createteam')
+    return redirect('teamdetails', pk=pk)  
+
+
 def register(request: HttpRequest) -> HttpResponse:
   if request.method == 'POST':
       email = request.POST.get('email')
       password = request.POST.get('password')
       passwordconfirm = request.POST.get('passwordconfirm')
   return render(request, "register.html")
+
