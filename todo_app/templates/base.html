@@ -1,7 +1,7 @@
-<!-- 
+{% comment %}
  The base template defines common page structure and elements to be extended by 
  all other view templates. This includes things like importing CSS libraries and the shared navbar. 
--->
+{% endcomment %}
 {% load static %}
 
 <!DOCTYPE html>
@@ -18,7 +18,7 @@
         <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     </head>
     <body>
-        <!-- TODO: Update and use Bootstrap to define navbar header here... -->
+        {% comment %} TODO: Update and use Bootstrap to define navbar header here... {% endcomment %}
         <header>
             <div class="header-container">
                 <h1 class="app-name">ToDo List</h1>
