@@ -1,50 +1,39 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<div class="login-container container mt-5">
-    <h1 class="text-center mb-4">Login</h1>
-    <form method="POST" action="{% url 'login' %}" class="needs-validation" novalidate>
+
+<link rel="stylesheet" href="{% static 'login.css' %}" type="text/css">
+
+<div class="login-container">
+    <h1>Login</h1>
+    <form method="POST" action="{% url 'login' %}">
         {% csrf_token %}
-        
-        <!-- Username Field -->
-        <div class="form-group mb-3">
-            <label for="username" class="form-label"><h4>Username</h4></label>
+        <div class="form-group">
+            <label for="username">Username</label>
             <input 
                 type="text" 
                 id="username" 
                 name="username" 
-                class="form-control" 
                 placeholder="Enter your username" 
                 required>
         </div>
-
-        <!-- Password Field -->
-        <div class="form-group mb-3">
-            <label for="password" class="form-label"><h4>Password</h4></label>
+        <div class="form-group">
+            <label for="password">Password</label>
             <input 
                 type="password" 
                 id="password" 
                 name="password" 
-                class="form-control" 
                 placeholder="Enter your password" 
                 required>
         </div>
-
-        <!-- Submit Button -->
-        <div class="d-flex justify-content-center">
-            <button type="submit" class="btn btn-primary px-4 py-2">Login</button>
-        </div>
+        <button type="submit" class="submit-btn">Login</button>
     </form>
-
-    <!-- Forgot Password Link -->
-    <div class="forgot-password text-center mt-3">
-        <a href="{% url 'forgot_password' %}" class="text-decoration-none">Forgot Password?</a>
+    <div class="forgot-password">
+        <a href="{% url 'forgot_password' %}">Forgot Password?</a>
     </div>
-
-    <!-- Error Messages -->
     {% if form.errors %}
-        <div class="error-messages alert alert-danger mt-4">
-            <ul class="mb-0">
+        <div class="error-messages">
+            <ul>
                 {% for field, errors in form.errors.items %}
                     {% for error in errors %}
                         <li>{{ error }}</li>
