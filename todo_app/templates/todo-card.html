@@ -1,11 +1,13 @@
 <div class="card">
     <div class="card-header">
         {% if todo.state == "A" %}
-            {% comment %} Active - {{Time}} {% endcomment %}
+            <span class="card-text" id="todo-elapsed-{{todo.id}}"></span>
         {% elif todo.state == "P" %}
-            Paused - {% comment %} {% endcomment %}
+            Paused - <span class="card-text" id="todo-elapsed-{{todo.id}}"></span>
         {% elif todo.state == "S" %}
-            Stopped - {% comment %} {% endcomment %}
+            Stopped - <span class="card-text" id="todo-elapsed-{{todo.id}}"></span>
+        {% else %}
+            &nbsp; {% comment %} Invisible content to keep card header full height. {% endcomment %}
         {% endif %}
     </div>
 
@@ -50,3 +52,28 @@
         </div>
     </div>
 </div>
+
+<script data-state="{{todo.state}}" data-output-id="todo-elapsed-{{todo.id}}" data-start-time="{{todo.relative_start}}" >
+{
+    const data = document.currentScript.dataset;
+    const timeDisplay = document.getElementById(data.outputId);
+    if (timeDisplay) { // If output element is present then we calculate and update the time.
+        const startTime = new Date(data.startTime);
+        let elapsed = new Date();
+    
+        function updateTimer() {
+            // Calculate the passed time and display with only time details larger than 0.
+            elapsed.setTime(Date.now() - startTime);
+            let timeStr =   (elapsed.getUTCHours() > 0 ? `${elapsed.getUTCHours()}h ` : "") +
+                            (elapsed.getUTCMinutes() > 0 ? `${elapsed.getUTCMinutes()}m ` : "")  + 
+                            `${elapsed.getUTCSeconds()}s`
+            timeDisplay.innerText = timeStr
+        }
+    
+        updateTimer();
+        if (data.state == "A") { // If the todo item is active then the timer should tick and update.
+            setInterval(updateTimer, 1000);
+        }
+    }
+}
+</script>
