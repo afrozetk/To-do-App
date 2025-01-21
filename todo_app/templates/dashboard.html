@@ -3,19 +3,14 @@
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center mb-4">Your To-Do List</h1>
-    {% if todos %} <!-- Show create button if the list is NOT empty -->
-        <a href="{% url 'create' %}" class="btn btn-primary mb-3 ">Create ToDo</a>
-    {% endif %}
+    <div class="d-flex justify-content-end">
+        <a href="{% url 'create' %}" class="btn btn-primary mb-3">Create ToDo</a>
+    </div>
 
     {% for todo in todos %}
         {% include "todo-card.html" %}
     {% empty %}
-        <div class="card-body">
-            <h5 class="card-title text-center mb-2">No ToDo items found</h5>
-            <p class="card-text">
-                <a href="{% url 'create' %}" class="btn btn-primary btn-sm">Create ToDo</a>
-            </p>
-        </div>
+        <h5 class="text-center mb-2">No ToDo items found</h5>
     {% endfor %}
 </div>
 {% endblock %}

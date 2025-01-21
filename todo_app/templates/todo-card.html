@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card mb-3">
     <div class="card-header">
         {% if todo.state == "A" %}
             <span class="card-text" id="todo-elapsed-{{todo.id}}"></span>
@@ -14,6 +14,9 @@
     <div class="card-body">
         <h3 class="card-title">{{todo.title}}</h3>
         <p class="card-text">{{todo.description}}</p>
+
+        <div class="containier">
+            <div class="row justify-content-between">
                 <form action="{% url 'todo_setstate' todo.id %}" method="POST" class="col-auto me-auto">
                     {% csrf_token %}
             
@@ -26,6 +29,7 @@
                         <button type="submit" name="state" value="P" class="btn btn-outline-warning">Pause</button>
                     {% endif %}
                 </form>
+                <div class="col-auto">
                     <a href="{% url 'edit' todo.id %}" class="btn btn-secondary">Edit</a>
                     <button type="button"
                         class="btn btn-outline-danger"
@@ -33,10 +37,13 @@
                         data-bs-target="#todo-delete-modal-{{todo.id}}">
                         Delete
                     </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Modal modified from bootstrap documentation example: https://getbootstrap.com/docs/5.3/components/modal/#live-demo -->
+{% comment %} Modal modified from bootstrap documentation example: https://getbootstrap.com/docs/5.3/components/modal/#live-demo {% endcomment %}
 <div class="modal fade" id="todo-delete-modal-{{todo.id}}" tabindex="-1" aria-labelledby="todoDeleteModal" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
