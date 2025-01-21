@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, CreateTodoForm, TeamForm, MemberForm
-from django.contrib import messages
 from .models import Todo, Team, TeamMember
 
 # Define views here:
