@@ -1,15 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse
-from django.contrib.auth import authenticate, logout
-from .forms import LoginForm, CreateTodoForm, TeamForm, MemberForm
+from django.contrib.auth import authenticate, logout, login as auth_login
+from .forms import LoginForm, ResetPasswordForm, CreateTodoForm, TeamForm, MemberForm
 from django.contrib import messages
-from .forms import CreateTodoForm, ResetPasswordForm
 from .models import Todo, Team, TeamMember
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login as auth_login
-from django.core.exceptions import ObjectDoesNotExist
 
 # Define views here:
 
@@ -20,9 +17,9 @@ def index(request: HttpRequest) -> HttpResponse:
 def about(request: HttpRequest) -> HttpResponse:
     return render(request, "about.html")
   
-def dashboard_view(request):
-  todos = Todo.objects.all()  # Fetch all ToDo items from the database
-  return render(request, 'dashboard.html', {'todos': todos})
+def dashboard(request):
+    todos = Todo.objects.all()  # Fetch all ToDo items from the database
+    return render(request, 'dashboard.html', {'todos': todos})
 
   
 def todo_create(request: HttpRequest) -> HttpResponse:
@@ -104,9 +101,9 @@ def delete_team(request, pk):
 
 def register(request: HttpRequest) -> HttpResponse:
   if request.method == 'POST':
-      email = request.POST.get('email')
-      password = request.POST.get('password')
-      passwordconfirm = request.POST.get('passwordconfirm')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        passwordconfirm = request.POST.get('passwordconfirm')
   return render(request, "register.html")
 
 
@@ -156,7 +153,7 @@ def login_view(request):
         if user is not None:
             print(f"Authentication successful for {email}")
             auth_login(request, user)  # Log the user in
-            return redirect('dashboard_view')  # Redirect to the dashboard
+            return redirect('dashboard')  # Redirect to the dashboard
         else:
             print(f"Authentication failed for {email}")
             messages.error(request, "Invalid email or password. Please check your credentials and try again.")
@@ -191,9 +188,9 @@ def forgot_password(request):
     return render(request, 'forgot_password.html', {'form': form}) 
 
 def password_reset_success(request):
-  # Your success page logic here
-  return render(request, 'password_reset_success.html')
+    # Your success page logic here
+    return render(request, 'password_reset_success.html')
 
 def logout_view(request):
-  logout(request)
-  return redirect('login') 
+    logout(request)
+    return redirect('login') 
