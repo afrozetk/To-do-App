@@ -100,6 +100,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Login page URL when user is not authenticated
+# https://docs.djangoproject.com/en/5.1/ref/settings/#std-setting-LOGIN_URL
+LOGIN_URL = '/login/'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
