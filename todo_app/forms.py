@@ -41,6 +41,7 @@ class CreateTodoForm(forms.ModelForm):
     class Meta:
         model = Todo
         fields = ['title', 'description', 'due_date', 'category', 'team']
+        exclude = ['user']
 
         # Referenced documentation and AI to figure out how to create a select field for forign key:
         team = forms.ModelChoiceField(
