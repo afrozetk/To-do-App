@@ -1,12 +1,12 @@
 {% extends "base.html" %} 
 {% load static %}
 {% block content %}
-<form action="/teamdetails" method="POST">
+<form action="{% url 'teamdetails' team.id %}" method="POST">
     {% csrf_token %}
     <div class="container mt-5">
 
         <div class="row mb-3">
-            <p>{{ team.name }}</p>
+            <h2>{{ team.name }}</h2>
         </div>
 
         <div class="row mb-3">
@@ -16,14 +16,14 @@
         <div class="row mb-3">
             <h4>Team Members</h4>
             <div class="col">
-                <input type="text" id="member-input" class="form-control" placeholder="Add a member">
+                {{ form.name }} {% comment %} Use form model to inject input field. {% endcomment %}
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col">
                 <ul id="team-members-list" class="list-group">
-                    {% for member in team.members %}
+                    {% for member in members %}
                         <li class="list-group-item">{{ member }}</li>
                     {% endfor %}
                 </ul>
@@ -34,29 +34,37 @@
 
     <div class="row mt-3"> 
         <div class="col text-end"> 
-            <button type="button" class="btn btn-success" id="add-member-btn">Update</button>
+            <button type="submit" class="btn btn-success">Update</button>
             <button type="button" class="btn btn-secondary" onclick="window.location.href='/'">Cancel</button>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete Team</button>
         </div>
     </div>
 </form>
 
-<!-- Add JavaScript for dynamic member addition -- done using requesting AI for a section with 
- team members populating to the right of the input field -->
-<script>
-    const memberInput = document.getElementById('member-input');
-    const addMemberBtn = document.getElementById('add-member-btn');
-    const membersList = document.getElementById('team-members-list');
 
-    addMemberBtn.addEventListener('click', function () {
-        const memberName = memberInput.value.trim();
-        if (memberName) {
-            const listItem = document.createElement('li');
-            listItem.className = 'list-group-item';
-            listItem.textContent = memberName;
-            membersList.appendChild(listItem);
-            memberInput.value = '';
-        }
-    });
-</script>
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you wish to delete this team? Doing so will also remove any Todo items assigned to this team.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{% url 'delete_team' team.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 
 {% endblock %}
