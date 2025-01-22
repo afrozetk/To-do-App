@@ -16,12 +16,13 @@ def index(request: HttpRequest) -> HttpResponse:
   
 def about(request: HttpRequest) -> HttpResponse:
     return render(request, "about.html")
-  
+
+@login_required()
 def dashboard(request):
     todos = Todo.objects.all()  # Fetch all ToDo items from the database
     return render(request, 'dashboard.html', {'todos': todos})
 
-  
+@login_required()
 def todo_create(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = CreateTodoForm(request.POST)
@@ -34,6 +35,7 @@ def todo_create(request: HttpRequest) -> HttpResponse:
         form = CreateTodoForm()  
     return render(request, 'create.html', {'form': form})
 
+@login_required()
 def todo_edit(request, id):
     todo=get_object_or_404(Todo, id=id)
     if request.method == 'POST':
@@ -45,6 +47,7 @@ def todo_edit(request, id):
         form = CreateTodoForm(instance=todo)
     return render(request, "edit.html", {'form': form, 'todo': todo})
 
+@login_required()
 def todo_setstate(request: HttpRequest, id) -> HttpResponse:
     if request.method == 'POST' and request.POST.get("state"):
         todo = get_object_or_404(Todo, id=id)
@@ -52,14 +55,15 @@ def todo_setstate(request: HttpRequest, id) -> HttpResponse:
         todo.save()
     return redirect('dashboard')
 
-
+@login_required()
 def todo_delete(request: HttpRequest, id) -> HttpResponse:
     todo = Todo.objects.get(id=id)
     if todo:
         todo.delete()
     return redirect('dashboard')
 
-  
+
+@login_required()
 def createteam(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = TeamForm(request.POST)
@@ -70,7 +74,7 @@ def createteam(request: HttpRequest) -> HttpResponse:
         form = TeamForm()
     return render(request, 'createteam.html', {'form': form})
         
-
+@login_required()
 def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
     # Get team by ID and it's associated members from the DB model:
     team = get_object_or_404(Team, pk=pk)
@@ -89,6 +93,7 @@ def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
         form = MemberForm()
     return render(request, 'teamdetails.html', {'team': team, 'members': members, 'form': form})
 
+@login_required()
 def delete_team(request, pk):
     # Get team by ID and it's associated members from the DB model:
     team = get_object_or_404(Team, pk=pk)
