@@ -153,19 +153,21 @@ def login_view(request):
         
         print(f"Attempting to login with Email: {email} and Password: {password}")
 
+        next_redirect = request.POST.get('next', 'dashboard')
         # Authenticate user
         user = authenticate(request, username=email, password=password)
         if user is not None:
             print(f"Authentication successful for {email}")
             auth_login(request, user)  # Log the user in
-            return redirect('dashboard')  # Redirect to the dashboard
+            return redirect(next_redirect)  # Redirect to the dashboard
         else:
             print(f"Authentication failed for {email}")
             messages.error(request, "Invalid email or password. Please check your credentials and try again.")
             print(f"Failed login attempt: {email} with password {password}")
-            return render(request, "login.html")  # Stay on the login page if authentication fails
+            return render(request, "login.html", { 'next': next_redirect })  # Stay on the login page if authentication fails
     
-    return render(request, 'login.html')
+    next_redirect = request.GET.get('next', 'dashboard')
+    return render(request, 'login.html', {'next': next_redirect})
 
 def forgot_password(request):
     if request.method == 'POST':

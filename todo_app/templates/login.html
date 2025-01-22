@@ -33,6 +33,9 @@
                 required>
         </div>
         <button type="submit" class="submit-btn">Login</button>
+
+        {% comment %} Pass along the next redirect argument so user will automatically be sent to the page they wanted. {% endcomment %}
+        <input type="hidden" name="next" value="{{ next }}">
     </form>
     <div class="register-link">
         <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
