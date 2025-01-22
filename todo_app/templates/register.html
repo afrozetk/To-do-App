@@ -1,29 +1,60 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<form action="/register" method="POST">
-    {% csrf_token %}
-    <div class="container mt-5">
 
-        <div class="row mb-3">
-            <h4 class="col-3">Email</h4>
-            <input type="text" class="col-9" name="email" required>
+<link rel="stylesheet" href="{%static 'login.css'%}" type="text/css">
+
+
+<div class="login-container">
+    <h1>Login</h1>
+    <form method="POST" action="{% url 'register' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Email</label>
+            <input 
+                type="email" 
+                id="username" 
+                name="username" 
+                placeholder="Enter your email" 
+                required
+                value="{{ form.username.value|default_if_none:'' }}">
+            {%if form.username.errors %}
+                <div class="error-message">
+                    {{ form.username.errors.0 }}
+                </div>
+            {% endif %}
         </div>
 
-        <div class="row mb-3">
-            <h4 class="col-3">Password</h4>
-            <input type="password" class="col-9" name="password" required>
+        <div class="form-group">
+            <label for="new_password">New Password</label>
+            <input 
+                type="password" 
+                id="new_password" 
+                name="new_password" 
+                placeholder="Enter new password" 
+                required>
         </div>
-
-        <div class="row mb-3">
-            <h4 class="col-3">Confirm Password</h4>
-            <input type="password" class="col-9" name="passwordconfirm" required>
+        <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input 
+                type="password" 
+                id="confirm_password" 
+                name="confirm_password" 
+                placeholder="Confirm your password" 
+                required>
         </div>
-
-    </div>
 
     <div class="col"> 
         <button type="submit" class="btn btn-primary">Register</button>
     </div>
 </form>
-{% endblock %}
+{% if messages %}
+    <div class = "messages">
+        {%for message in messages %}
+            <div class = "message">{{ message }}</div>
+        {% endfor %}
+    </div>
+{%endif%}
+</div>
+
+{% endblock%} 

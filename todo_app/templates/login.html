@@ -9,13 +9,19 @@
     <form method="POST" action="{% url 'login' %}">
         {% csrf_token %}
         <div class="form-group">
-            <label for="username">Username</label>
+            <label for="username">Email</label>
             <input 
-                type="text" 
+                type="email" 
                 id="username" 
                 name="username" 
-                placeholder="Enter your username" 
-                required>
+                placeholder="Enter your email" 
+                required
+                value="{{ form.username.value|default_if_none:'' }}">
+            {%if form.username.errors %}
+                <div class="error-message">
+                    {{ form.username.errors.0 }}
+                </div>
+            {% endif %}
         </div>
         <div class="form-group">
             <label for="password">Password</label>
@@ -28,6 +34,9 @@
         </div>
         <button type="submit" class="submit-btn">Login</button>
     </form>
+    <div class="register-link">
+        <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+    </div>
     <div class="forgot-password">
         <a href="{% url 'forgot_password' %}">Forgot Password?</a>
     </div>
