@@ -18,14 +18,14 @@ def about(request: HttpRequest) -> HttpResponse:
     return render(request, "about.html")
 
 @login_required()
-def dashboard(request):
-    todos = Todo.objects.all()  # Fetch all ToDo items from the database
+def dashboard(request: HttpRequest) -> HttpResponse:
+    todos = Todo.objects.filter(user=request.user) # Fetch all Todo items linked to authenticated from the DB.
     return render(request, 'dashboard.html', {'todos': todos})
 
 @login_required()
 def todo_create(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
-        form = CreateTodoForm(request.POST)
+        form = CreateTodoForm(request.POST, instance=Todo(user=request.user))
         if form.is_valid():
             form.save()
             return redirect('dashboard')

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from datetime import datetime, timedelta, timezone
 
 # Define data models:
@@ -26,6 +27,7 @@ class TodoState(models.TextChoices):
         STOPPED = "S", "Stopped"
 
 class Todo(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, default=1)
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     due_date = models.DateField()
