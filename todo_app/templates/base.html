@@ -32,7 +32,7 @@
                       <a href="{% url 'create' %}">[Create To-Do]</a>
                       <a href="{% url 'dashboard' %}">[Dashboard] </a>
                       
-                      <a href="{% url 'logout' %}" class="logout-button">[Logout <span class="user-email"> {{ user.username }}</span>] </a>
+                      <a href="{% url 'logout' %}" class="logout-button">[Logout <span class="user-email"> {{ user.username }}</span>] </a> {%comment%} Don't seperate the email from logout, it will format weirdly {%endcomment%}
                       
                       
                       
