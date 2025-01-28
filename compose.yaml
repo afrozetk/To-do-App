@@ -17,6 +17,15 @@ services:
  
  django-web:
    build: .
+   develop:
+    watch:
+      - action: sync
+        path: .
+        target: /app
+        ignore:
+          - .venv
+      - action: rebuild
+        path: requirements.txt
    container_name: django-todo
    ports:
      - "8000:8000"
