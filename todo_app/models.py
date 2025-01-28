@@ -8,6 +8,8 @@ from datetime import datetime, timedelta, timezone
 class Team(models.Model):
     name = models.CharField(max_length=70)
     description = models.TextField()
+    #v1.2 create owner field 
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, default=1)
 
     def __str__(self):
         return self.name
