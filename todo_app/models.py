@@ -18,6 +18,16 @@ class TeamMember(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
+    class Meta:
+        constraints = [ 
+            # Define a constraint on the DB that the user and team must be a unique combo
+            # so users can't be in the same team multiple times.
+            models.UniqueConstraint( 
+                name="unique_member_in_team", 
+                fields=["user", "team"]
+            )
+        ]
+
     def __str__(self):
         return self.user.username
     
