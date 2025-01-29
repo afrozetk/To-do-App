@@ -56,7 +56,7 @@ class CreateTodoForm(forms.ModelForm):
             'category': forms.TextInput(attrs={'class': 'form-control'}),
             'team': forms.Select(attrs={'class': 'form-control'})
         }
-
+    
 
 class TeamForm(forms.ModelForm):
     class Meta:
@@ -66,7 +66,7 @@ class TeamForm(forms.ModelForm):
 class MemberForm(forms.ModelForm):
     class Meta:
         model = TeamMember
-        exclude = ['team'] # Exclude the team field from the form since it will be filled automatically in view.
+        exclude = ['team', 'owner'] # Exclude the team field from the form since it will be filled automatically in view.
 
         # Define the widget styles/attributes for the form field: 
         widgets = {
@@ -75,3 +75,25 @@ class MemberForm(forms.ModelForm):
                 'class': 'form-control', 
                 'placeholder': 'Add a member'}
         )}
+    def __init__(self, *args, **kwargs):
+        self.team = kwargs.pop('team', None)
+        super().__init__(*args, **kwargs)
+
+    #validation for making sure the email exists in the db, used documentation and AI
+    def clean_name(self):
+        email = self.cleaned_data['name']
+        
+        # Check if the user exists by email in the username field
+        try:
+            user = User.objects.get(username=email) 
+        except User.DoesNotExist:
+            raise ValidationError("No user found with this email address.")
+        
+        if user == self.team.owner:
+            raise ValidationError("The team owner cannot be added as a member.")
+
+        # Check if the user is already part of this team
+        if TeamMember.objects.filter(team=self.team, name=email).exists():
+            raise ValidationError(f"{email} is already a member of this team.")
+            
+        return email

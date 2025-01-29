@@ -8,6 +8,10 @@
         <div class="row mb-3">
             <h2>{{ team.name }}</h2>
         </div>
+        <!-- Display the team owner  -->
+        <div class="row mb-3">
+            <p><strong>Team Owner:</strong> {{ team.owner}}</p>  
+        </div>
 
         <div class="row mb-3">
             <p>{{ team.description }}</p>
@@ -42,6 +46,31 @@
 </form>
 
 
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul>
+                    {% for field, errors in form.errors.items %}
+                        {% if field == "name" %}
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -64,6 +93,16 @@
     </div>
 </div>
 
+
+<!-- used AI to understand model and for this portion -->
+{% if form.errors.name %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+        errorModal.show();
+    });
+</script>
+{% endif %}
 
 
 
