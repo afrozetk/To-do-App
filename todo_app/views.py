@@ -182,10 +182,12 @@ def forgot_password(request):
             user = User.objects.filter(username=email).first()
             
             if user:
+                # Create a targeted reset url with user reference token: 
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
                 token = default_token_generator.make_token(user)
                 reset_url = request.build_absolute_uri(reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": token}))
                 
+                # Send out an email with the reset link to the user: 
                 send_mail(
                     "Password Reset Request",
                     f"Click the link below to reset your password:\n\n{reset_url}",
@@ -196,15 +198,14 @@ def forgot_password(request):
 
                 # Redirect to the new confirmation page
                 return redirect('password_reset_sent')
-
             else:
                 return render(request, "forgot_password.html", {"error_message": "No account found with that email."})
-
         except Exception as e:
             print(f"Error in forgot_password: {e}")
             return render(request, "forgot_password.html", {"error_message": "An error occurred. Please try again."})
 
     return render(request, "forgot_password.html")
+
 def logout_view(request):
     logout(request)
     return redirect('login') 
