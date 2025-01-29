@@ -78,6 +78,16 @@ def todo_delete(request: HttpRequest, id) -> HttpResponse:
 
 
 @login_required()
+def teams(request: HttpRequest) -> HttpResponse:
+    owned_teams = Team.objects.filter(owner=request.user)
+
+    if not owned_teams:
+        form = TeamForm()
+        return render(request, 'createteam.html', {'form': form})
+    
+    return redirect('teamdetails', pk=owned_teams.first().pk)
+
+@login_required()
 def createteam(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = TeamForm(request.POST)

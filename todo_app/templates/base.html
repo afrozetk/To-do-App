@@ -28,7 +28,7 @@
                   {% if user.is_authenticated %}
                       {% comment %} Display email and logout if user is signed in {% endcomment %}
                       
-                      <a href="{% url 'createteam' %}">[Create Team]</a>
+                      <a href="{% url 'teams' %}">[Teams]</a>
                       <a href="{% url 'create' %}">[Create To-Do]</a>
                       <a href="{% url 'dashboard' %}">[Dashboard] </a>
                       
