@@ -85,14 +85,15 @@ def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
 
     if request.method == 'POST':
         # Create form model with the missing team foreign key so it validates properly.
-        form = MemberForm(request.POST, team=team) 
+        form = MemberForm(
+            request.POST,
+            instance=TeamMember(team=team)
+        )
         if form.is_valid():
-            member = form.save(commit=False)
-            member.team = team  
-            member.save()  
+            form.save()
             return redirect('teamdetails', pk=team.pk)
     else:
-        form = MemberForm(team=team)
+        form = MemberForm()
     return render(request, 'teamdetails.html', {'team': team, 'members': members, 'form': form})
 
 @login_required()

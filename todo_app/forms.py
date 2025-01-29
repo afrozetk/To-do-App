@@ -63,37 +63,41 @@ class TeamForm(forms.ModelForm):
         model = Team
         fields = ['name', 'description']
 
+
 class MemberForm(forms.ModelForm):
     class Meta:
         model = TeamMember
-        exclude = ['team', 'owner'] # Exclude the team field from the form since it will be filled automatically in view.
+        exclude = ['user', 'team'] # Exclude the team field from the form since it will be filled automatically in view.
 
-        # Define the widget styles/attributes for the form field: 
-        widgets = {
-            'name': forms.TextInput(attrs={
-                'type': 'text', 
-                'class': 'form-control', 
-                'placeholder': 'Add a member'}
-        )}
+    email = forms.EmailField(
+        required=True, 
+        max_length=150,
+        widget=forms.EmailInput(attrs={ # Define the widget styles/attributes for the email field: 
+            'class': 'form-control', 
+            'placeholder': 'Add a member'}
+        )
+    )
+        
     def __init__(self, *args, **kwargs):
-        self.team = kwargs.pop('team', None)
         super().__init__(*args, **kwargs)
 
     #validation for making sure the email exists in the db, used documentation and AI
-    def clean_name(self):
-        email = self.cleaned_data['name']
+    def clean_email(self):
+        email = self.cleaned_data['email']
         
-        # Check if the user exists by email in the username field
+        # Populate the user field by checking if the email belongs to an existing user:
         try:
-            user = User.objects.get(username=email) 
+            self.instance.user = User.objects.get(username=email) 
         except User.DoesNotExist:
-            raise ValidationError("No user found with this email address.")
+            raise ValidationError(f"A user with the email: {email} does not exist.")
         
-        if user == self.team.owner:
+        if self.instance.user == self.instance.team.owner:
             raise ValidationError("The team owner cannot be added as a member.")
 
-        # Check if the user is already part of this team
-        if TeamMember.objects.filter(team=self.team, name=email).exists():
-            raise ValidationError(f"{email} is already a member of this team.")
+        # Validate model constraints to check if the user is already part of this team:
+        try:
+            self.instance.validate_constraints()
+        except ValidationError:
+            raise ValidationError(f"The user {email} is already a member of this team.")
             
         return email
