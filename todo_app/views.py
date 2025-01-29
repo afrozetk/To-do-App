@@ -146,7 +146,7 @@ def register_view(request):
 
         # Redirect to login page after successful registration
         messages.success(request, "Account created successfully. Please log in.")
-        return redirect('login')  # Replace 'login' with your login page URL pattern name
+        return redirect('/login/')
 
     return render(request, 'register.html')
 
