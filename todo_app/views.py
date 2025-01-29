@@ -5,8 +5,13 @@ from .forms import LoginForm, ResetPasswordForm, CreateTodoForm, TeamForm, Membe
 from django.contrib import messages
 from .models import Todo, Team, TeamMember
 from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.conf import settings
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
 
 # Define views here:
 
@@ -170,34 +175,39 @@ def login_view(request):
     return render(request, 'login.html', {'next': next_redirect})
 
 def forgot_password(request):
-    if request.method == 'POST':
-        form = ResetPasswordForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            new_password = form.cleaned_data['new_password']
-            
-            # Check if email exists in the 'username' field
+    if request.method == "POST":
+        email = request.POST.get("email")
+        
+        try:
             user = User.objects.filter(username=email).first()
+            
             if user:
-                # Update the user's password
-                user.password = make_password(new_password)
-                user.save()
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                token = default_token_generator.make_token(user)
+                reset_url = request.build_absolute_uri(reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": token}))
+                
+                send_mail(
+                    "Password Reset Request",
+                    f"Click the link below to reset your password:\n\n{reset_url}",
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
 
-                # After saving the new password, redirect to the success page
-                return redirect('password_reset_success')
+                # Redirect to the new confirmation page
+                return redirect('password_reset_sent')
+
             else:
-                form.add_error('email', 'No user found with this email address.')  # Add error if no user found
-        else:
-            print("Form errors:", form.errors)
-    else:
-        form = ResetPasswordForm()
+                return render(request, "forgot_password.html", {"error_message": "No account found with that email."})
 
-    return render(request, 'forgot_password.html', {'form': form}) 
+        except Exception as e:
+            print(f"Error in forgot_password: {e}")
+            return render(request, "forgot_password.html", {"error_message": "An error occurred. Please try again."})
 
-def password_reset_success(request):
-    # Your success page logic here
-    return render(request, 'password_reset_success.html')
-
+    return render(request, "forgot_password.html")
 def logout_view(request):
     logout(request)
     return redirect('login') 
+
+def password_reset_sent(request):
+    return render(request, "password_reset_sent.html")
