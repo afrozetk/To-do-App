@@ -20,7 +20,7 @@
         <div class="row mb-3">
             <h4>Team Members</h4>
             <div class="col">
-                {{ form.name }} {% comment %} Use form model to inject input field. {% endcomment %}
+                {{ form.email }} {% comment %} Use form model to inject input field. {% endcomment %}
             </div>
         </div>
 
@@ -56,7 +56,7 @@
             <div class="modal-body">
                 <ul>
                     {% for field, errors in form.errors.items %}
-                        {% if field == "name" %}
+                        {% if field == "email" %}
                             {% for error in errors %}
                                 <li>{{ error }}</li>
                             {% endfor %}
@@ -95,7 +95,7 @@
 
 
 <!-- used AI to understand model and for this portion -->
-{% if form.errors.name %}
+{% if form.errors.email %}
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         var errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
