@@ -25,6 +25,15 @@ def about(request: HttpRequest) -> HttpResponse:
 @login_required()
 def dashboard(request: HttpRequest) -> HttpResponse:
     todos = Todo.objects.filter(user=request.user) # Fetch all Todo items linked to authenticated from the DB.
+
+    # Get all the teams the user is apart of and add any items assigned to
+    # those teams to be displayed on their dashboard.
+    users_teams = TeamMember.objects.filter(user=request.user)
+    todos = todos.union(*[
+        Todo.objects.filter(team=user_member.team).exclude(user=request.user) 
+        for user_member in users_teams
+    ])
+
     return render(request, 'dashboard.html', {'todos': todos})
 
 @login_required()
@@ -76,6 +85,9 @@ def createteam(request: HttpRequest) -> HttpResponse:
             team=form.save(commit=False)
             team.owner=request.user #set the owner of the team to the current user
             team.save()
+
+            owner_member = TeamMember(user=team.owner, team=team)
+            owner_member.save()
             return redirect('teamdetails', pk=team.id)
     else:
         form = TeamForm()
@@ -86,7 +98,7 @@ def createteam(request: HttpRequest) -> HttpResponse:
 def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
     # Get team by ID and it's associated members from the DB model:
     team = get_object_or_404(Team, pk=pk)
-    members = TeamMember.objects.filter(team=team)
+    members = TeamMember.objects.filter(team=team).exclude(user=team.owner)
 
     if request.method == 'POST':
         # Create form model with the missing team foreign key so it validates properly.
