@@ -68,12 +68,15 @@ def createteam(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = TeamForm(request.POST)
         if form.is_valid():
-            team=form.save()
+            team=form.save(commit=False)
+            team.owner=request.user #set the owner of the team to the current user
+            team.save()
             return redirect('teamdetails', pk=team.id)
     else:
         form = TeamForm()
     return render(request, 'createteam.html', {'form': form})
         
+
 @login_required()
 def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
     # Get team by ID and it's associated members from the DB model:
@@ -82,15 +85,14 @@ def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
 
     if request.method == 'POST':
         # Create form model with the missing team foreign key so it validates properly.
-        form = MemberForm(
-            request.POST, 
-            instance=TeamMember(team=team)
-        )
+        form = MemberForm(request.POST, team=team) 
         if form.is_valid():
-            form.save()
-        return redirect('teamdetails', team.pk)
+            member = form.save(commit=False)
+            member.team = team  
+            member.save()  
+            return redirect('teamdetails', pk=team.pk)
     else:
-        form = MemberForm()
+        form = MemberForm(team=team)
     return render(request, 'teamdetails.html', {'team': team, 'members': members, 'form': form})
 
 @login_required()
