@@ -38,22 +38,32 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     logger.info(f"Selected Team: {team_filter}")
 
     # Fetch user's personal ToDo items
-    todos = Todo.objects.filter(user=request.user)
+    personal_todos = Todo.objects.filter(user=request.user)
 
     # Get teams the user is part of and include tasks assigned to those teams
     users_teams = TeamMember.objects.filter(user=request.user)
-    todos = todos.union(*[
-        Todo.objects.filter(team=user_member.team).exclude(user=request.user) 
-        for user_member in users_teams
-    ])
 
-    # Apply Category filter if selected
+    # Filter team todos before union
+    team_todos = Todo.objects.none()  # Start with an empty QuerySet
+    for user_member in users_teams:
+        filtered_team_todos = Todo.objects.filter(team=user_member.team).exclude(user=request.user)
+
+        # Apply filters to team todos before union
+        if category_filter:
+            filtered_team_todos = filtered_team_todos.filter(category__iexact=category_filter)
+        if team_filter:
+            filtered_team_todos = filtered_team_todos.filter(team__name__iexact=team_filter)
+
+        team_todos = team_todos.union(filtered_team_todos)
+
+    # Apply filters to personal todos before the union
     if category_filter:
-        todos = todos.filter(category__iexact=category_filter)  # Case-insensitive match
-
-    # Apply Team filter if selected
+        personal_todos = personal_todos.filter(category__iexact=category_filter)
     if team_filter:
-        todos = todos.filter(team__name__iexact=team_filter)  # Case-insensitive match
+        personal_todos = personal_todos.filter(team__name__iexact=team_filter)
+
+    # Final union of both filtered querysets
+    todos = personal_todos.union(team_todos)
 
     # Log final filtered results
     logger.info(f"Filtered ToDos Count: {todos.count()}")
