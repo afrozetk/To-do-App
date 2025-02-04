@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
+from django.http import JsonResponse
 
 # Define views here:
 
@@ -21,44 +22,80 @@ def index(request: HttpRequest) -> HttpResponse:
   
 def about(request: HttpRequest) -> HttpResponse:
     return render(request, "about.html")
-
 @login_required()
 def dashboard(request: HttpRequest) -> HttpResponse:
-    todos = Todo.objects.filter(user=request.user) # Fetch all Todo items linked to authenticated from the DB.
+    # Get tasks created by the user
+    user_tasks = Todo.objects.filter(user=request.user)
 
-    # Get all the teams the user is apart of and add any items assigned to
-    # those teams to be displayed on their dashboard.
-    users_teams = TeamMember.objects.filter(user=request.user)
-    todos = todos.union(*[
-        Todo.objects.filter(team=user_member.team).exclude(user=request.user) 
-        for user_member in users_teams
-    ])
+    # Get tasks assigned to the user
+    assigned_tasks = Todo.objects.filter(assigned=request.user)
+
+    # Combine the tasks
+    todos = user_tasks | assigned_tasks  # Use the `|` operator to combine the querysets
 
     return render(request, 'dashboard.html', {'todos': todos})
 
+# @login_required()
+# def dashboard(request: HttpRequest) -> HttpResponse:
+#     todos = Todo.objects.filter(user=request.user) # Fetch all Todo items linked to authenticated from the DB.
+
+#     # Get all the teams the user is apart of and add any items assigned to
+#     # those teams to be displayed on their dashboard.
+#     users_teams = TeamMember.objects.filter(user=request.user)
+#     todos = todos.union(*[
+#         Todo.objects.filter(team=user_member.team).exclude(user=request.user) 
+#         for user_member in users_teams
+#     ])
+#      # Filter tasks based on the assigned user
+#     assigned_to_user = todos.filter(assigned=request.user)
+
+#     # Combine tasks for the logged-in user (both created and assigned)
+#     todos = todos.union(assigned_to_user)
+
+#     return render(request, 'dashboard.html', {'todos': todos})
+# v1.3 added assigned field - edit to add assigned field pending
 @login_required()
 def todo_create(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
-        form = CreateTodoForm(request.POST, instance=Todo(user=request.user))
+        form = CreateTodoForm(request.POST, instance=Todo(user=request.user), user=request.user)
         if form.is_valid():
-            form.save()
+            todo=form.save(commit=False)
+            assigned_user = form.cleaned_data.get('assigned')
+            if assigned_user:
+                todo.assigned = assigned_user
+            todo.save()
             return redirect('dashboard')
         else:
             print(form.errors)
     else:
-        form = CreateTodoForm()  
+        form = CreateTodoForm(user=request.user)  
     return render(request, 'create.html', {'form': form})
+
+
+@login_required
+def get_team_members(request, team_id):
+    team = get_object_or_404(Team, pk=team_id)
+    members = TeamMember.objects.filter(team=team).values('user__id', 'user__username') # Optimized query
+    member_list = [{'id': m['user__id'], 'username': m['user__username']} for m in members]
+    return JsonResponse(member_list, safe=False)
+
+ # v1.3 added assigned field - edit to add assigned field pending
 
 @login_required()
 def todo_edit(request, id):
     todo=get_object_or_404(Todo, id=id)
     if request.method == 'POST':
-        form = CreateTodoForm(request.POST, instance=todo)
+        form = CreateTodoForm(request.POST, instance=todo, user=request.user)
         if form.is_valid():
-            form.save()
+            todo=form.save(commit=False)
+            assigned_user = form.cleaned_data.get('assigned')
+            if assigned_user:
+                todo.assigned = assigned_user
+    
+            todo.save()
             return redirect('dashboard')
     else:
-        form = CreateTodoForm(instance=todo)
+        form = CreateTodoForm(instance=todo, user=request.user)
     return render(request, "edit.html", {'form': form, 'todo': todo})
 
 @login_required()
