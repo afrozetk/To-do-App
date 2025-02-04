@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse
 from django.contrib.auth import authenticate, logout, login as auth_login
@@ -13,28 +14,61 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 
+# Set up logging
+logger = logging.getLogger(__name__)
+
 # Define views here:
 
 def index(request: HttpRequest) -> HttpResponse:
     return render(request, "index.html")
 
-  
 def about(request: HttpRequest) -> HttpResponse:
     return render(request, "about.html")
 
 @login_required()
 def dashboard(request: HttpRequest) -> HttpResponse:
-    todos = Todo.objects.filter(user=request.user) # Fetch all Todo items linked to authenticated from the DB.
+    """Displays the to-do list with category and team filters."""
+    
+    # Fetch filters from request
+    category_filter = request.GET.get('category', '').strip()
+    team_filter = request.GET.get('team', '').strip()
 
-    # Get all the teams the user is apart of and add any items assigned to
-    # those teams to be displayed on their dashboard.
+    # Log filter values
+    logger.info(f"Selected Category: {category_filter}")
+    logger.info(f"Selected Team: {team_filter}")
+
+    # Fetch user's personal ToDo items
+    todos = Todo.objects.filter(user=request.user)
+
+    # Get teams the user is part of and include tasks assigned to those teams
     users_teams = TeamMember.objects.filter(user=request.user)
     todos = todos.union(*[
         Todo.objects.filter(team=user_member.team).exclude(user=request.user) 
         for user_member in users_teams
     ])
 
-    return render(request, 'dashboard.html', {'todos': todos})
+    # Apply Category filter if selected
+    if category_filter:
+        todos = todos.filter(category__iexact=category_filter)  # Case-insensitive match
+
+    # Apply Team filter if selected
+    if team_filter:
+        todos = todos.filter(team__name__iexact=team_filter)  # Case-insensitive match
+
+    # Log final filtered results
+    logger.info(f"Filtered ToDos Count: {todos.count()}")
+
+    # Get unique categories and teams for dropdown filters
+    categories = Todo.objects.filter(user=request.user).values_list('category', flat=True).distinct()
+    teams = Team.objects.filter(teammember__user=request.user).values_list('name', flat=True).distinct()
+
+    return render(request, 'dashboard.html', {
+        'todos': todos,
+        'categories': categories,
+        'teams': teams,
+        'selected_category': category_filter,
+        'selected_team': team_filter
+    })
 
 @login_required()
 def todo_create(request: HttpRequest) -> HttpResponse:
@@ -43,15 +77,13 @@ def todo_create(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             form.save()
             return redirect('dashboard')
-        else:
-            print(form.errors)
     else:
         form = CreateTodoForm()  
     return render(request, 'create.html', {'form': form})
 
 @login_required()
 def todo_edit(request, id):
-    todo=get_object_or_404(Todo, id=id)
+    todo = get_object_or_404(Todo, id=id)
     if request.method == 'POST':
         form = CreateTodoForm(request.POST, instance=todo)
         if form.is_valid():
@@ -71,11 +103,10 @@ def todo_setstate(request: HttpRequest, id) -> HttpResponse:
 
 @login_required()
 def todo_delete(request: HttpRequest, id) -> HttpResponse:
-    todo = Todo.objects.get(id=id)
+    todo = get_object_or_404(Todo, id=id)
     if todo:
         todo.delete()
     return redirect('dashboard')
-
 
 @login_required()
 def teams(request: HttpRequest) -> HttpResponse:
@@ -92,8 +123,8 @@ def createteam(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = TeamForm(request.POST)
         if form.is_valid():
-            team=form.save(commit=False)
-            team.owner=request.user #set the owner of the team to the current user
+            team = form.save(commit=False)
+            team.owner = request.user  # set the owner of the team to the current user
             team.save()
 
             owner_member = TeamMember(user=team.owner, team=team)
@@ -103,19 +134,14 @@ def createteam(request: HttpRequest) -> HttpResponse:
         form = TeamForm()
     return render(request, 'createteam.html', {'form': form})
         
-
 @login_required()
 def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
-    # Get team by ID and it's associated members from the DB model:
+    """Displays team details and allows adding team members."""
     team = get_object_or_404(Team, pk=pk)
     members = TeamMember.objects.filter(team=team).exclude(user=team.owner)
 
     if request.method == 'POST':
-        # Create form model with the missing team foreign key so it validates properly.
-        form = MemberForm(
-            request.POST,
-            instance=TeamMember(team=team)
-        )
+        form = MemberForm(request.POST, instance=TeamMember(team=team))
         if form.is_valid():
             form.save()
             return redirect('teamdetails', pk=team.pk)
@@ -125,7 +151,7 @@ def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required()
 def delete_team(request, pk):
-    # Get team by ID and it's associated members from the DB model:
+    """Deletes a team if the user is the owner."""
     team = get_object_or_404(Team, pk=pk)
 
     if request.method == 'POST':
@@ -133,86 +159,60 @@ def delete_team(request, pk):
         return redirect('createteam')
     return redirect('teamdetails', pk=pk)  
 
-
-def register(request: HttpRequest) -> HttpResponse:
-  if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        passwordconfirm = request.POST.get('passwordconfirm')
-  return render(request, "register.html")
-
-
-#used chat gpt for this code
 def register_view(request):
     if request.method == "POST":
         email = request.POST.get('username')
         password = request.POST.get('new_password')
         confirm_password = request.POST.get('confirm_password')
 
-        # Validate that passwords match
         if password != confirm_password:
             messages.error(request, "Passwords do not match.")
-            
             return render(request, 'register.html')
 
-        # Validate email uniqueness
         if User.objects.filter(username=email).exists():
             messages.error(request, "Email is already registered.")
             return render(request, 'register.html')
 
-        # Create the user
         try:
             user = User.objects.create_user(username=email, password=password)
             user.save()
-            print(f"User created: {user.username}")  # This will print to the console
         except Exception as e:
-            print(f"Error creating user: {e}")  # If there's any error, it'll print here
+            print(f"Error creating user: {e}")
 
-
-        # Redirect to login page after successful registration
         messages.success(request, "Account created successfully. Please log in.")
         return redirect('/login/')
 
     return render(request, 'register.html')
 
-#written based off chatgpt code
 def login_view(request):
     if request.method == "POST":
-        email = request.POST.get('username')  # Captures email as username
+        email = request.POST.get('username')  
         password = request.POST.get('password')
-        
-        print(f"Attempting to login with Email: {email} and Password: {password}")
 
         next_redirect = request.POST.get('next', 'dashboard')
-        # Authenticate user
         user = authenticate(request, username=email, password=password)
-        if user is not None:
-            print(f"Authentication successful for {email}")
-            auth_login(request, user)  # Log the user in
-            return redirect(next_redirect)  # Redirect to the dashboard
+        if user:
+            auth_login(request, user)
+            return redirect(next_redirect)  
         else:
-            print(f"Authentication failed for {email}")
-            messages.error(request, "Invalid email or password. Please check your credentials and try again.")
-            print(f"Failed login attempt: {email} with password {password}")
-            return render(request, "login.html", { 'next': next_redirect })  # Stay on the login page if authentication fails
-    
+            messages.error(request, "Invalid email or password.")
+            return render(request, "login.html", { 'next': next_redirect })  
+
     next_redirect = request.GET.get('next', 'dashboard')
     return render(request, 'login.html', {'next': next_redirect})
 
 def forgot_password(request):
+    """Handles password reset requests."""
     if request.method == "POST":
         email = request.POST.get("email")
         
         try:
             user = User.objects.filter(username=email).first()
-            
             if user:
-                # Create a targeted reset url with user reference token: 
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
                 token = default_token_generator.make_token(user)
                 reset_url = request.build_absolute_uri(reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": token}))
-                
-                # Send out an email with the reset link to the user: 
+
                 send_mail(
                     "Password Reset Request",
                     f"Click the link below to reset your password:\n\n{reset_url}",
@@ -220,14 +220,12 @@ def forgot_password(request):
                     [email],
                     fail_silently=False,
                 )
-
-                # Redirect to the new confirmation page
                 return redirect('password_reset_sent')
             else:
-                return render(request, "forgot_password.html", {"error_message": "No account found with that email."})
+                messages.error(request, "No account found with that email.")
         except Exception as e:
             print(f"Error in forgot_password: {e}")
-            return render(request, "forgot_password.html", {"error_message": "An error occurred. Please try again."})
+            messages.error(request, "An error occurred. Please try again.")
 
     return render(request, "forgot_password.html")
 
