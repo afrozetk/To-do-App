@@ -45,6 +45,8 @@ class Todo(models.Model):
     due_date = models.DateField()
     category = models.CharField(max_length=50,blank=True)
     team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True, blank=True)
+    #create assigned to field - v1.3
+    assigned = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="assigned_to")
 
     state = models.CharField(
         max_length=7, 

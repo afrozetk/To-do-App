@@ -35,7 +35,6 @@
                         </div>
                     {% endif %}
                 </div>
-
                 <!-- Category Field -->
                 <div class="mb-3">
                     <label for="id_category" class="form-label fw-bold">Category</label>
@@ -46,6 +45,52 @@
                     <label for="id_team" class="form-label fw-bold">Team</label>
                     {{ form.team}}
                 </div>
+                <!-- Asssigned Field -->
+                <div class="mb-3" >  <label for="id_assigned" class="form-label fw-bold">Assigned To:</label>
+                    {{ form.assigned}}
+                </div>
+                <!-- utilized ai for this section -->
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const teamSelect = document.getElementById('id_team');
+                        const assignedSelect = document.getElementById('id_assigned');
+                    
+                        function updateAssignedOptions(selectedTeamId) {
+                            if (selectedTeamId) {
+                                assignedSelect.disabled = false;
+                    
+                                fetch(`/get_team_members/${selectedTeamId}/`)
+                                    .then(response => response.json())
+                                    .then(members => {
+                                        assignedSelect.innerHTML = ''; // Clear existing options
+                    
+                                        members.forEach(member => {
+                                            let option = document.createElement('option');
+                                            option.value = member.id;
+                                            option.textContent = member.username;
+                                            assignedSelect.appendChild(option);
+                                        });
+                    
+                                        if (members.length === 0) {
+                                            assignedSelect.innerHTML = `<option value="" disabled selected>No members found</option>`;
+                                        }
+                                    });
+                            } else {
+                                assignedSelect.innerHTML = `<option value="{{ request.user.id }}" selected>{{ request.user.username }}</option>`;
+                                assignedSelect.disabled = true;
+                            }
+                        }
+                    
+                        // Run when page loads
+                        updateAssignedOptions(teamSelect.value);
+                    
+                        // Update when team selection changes
+                        teamSelect.addEventListener('change', function () {
+                            updateAssignedOptions(this.value);
+                        });
+                    });
+                    </script>
+                    
                 <!-- Action Buttons -->
                 <div class="d-flex justify-content-end">
                     <button type="button" class="btn btn-danger"  onclick="window.location.href='{% url 'dashboard' %}'">Cancel</button>
@@ -55,4 +100,6 @@
         </div>
     </div>
 </div>
+
+
 {% endblock %}

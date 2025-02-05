@@ -2,6 +2,7 @@ from django import forms
 from .models import Todo, Team, TeamMember
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 class LoginForm(forms.Form):
     username = forms.CharField(
@@ -37,10 +38,11 @@ class ResetPasswordForm(forms.Form):
         return cleaned_data
 
     
-class CreateTodoForm(forms.ModelForm):
+class CreateTodoForm(forms.ModelForm):  
     class Meta:
         model = Todo
-        fields = ['title', 'description', 'due_date', 'category', 'team']
+        # include assigned field in fields v1.3
+        fields = ['title', 'description', 'due_date', 'category', 'team','assigned']
         exclude = ['user']
 
         # Referenced documentation and AI to figure out how to create a select field for forign key:
@@ -48,15 +50,44 @@ class CreateTodoForm(forms.ModelForm):
             queryset=Team.objects.all(),
             empty_label="team"
         )
+        # v1.3 added assigned field
+        assigned = forms.ModelChoiceField(
+            queryset=User.objects.all(), 
+            required=False,
+        )
 
         widgets = {
             'due_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
             'category': forms.TextInput(attrs={'class': 'form-control'}),
-            'team': forms.Select(attrs={'class': 'form-control'})
+            'team': forms.Select(attrs={'class': 'form-control'}),
+             # v1.3 added assigned field
+            'assigned': forms.Select(attrs={'class': 'form-control'})
         }
+    def clean_due_date(self):
+        due_date = self.cleaned_data['due_date']
+        if due_date < timezone.now().date():
+            raise ValidationError("Due date cannot be in the past.")
+        return due_date
     
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # Extract 'user' from kwargs
+        super(CreateTodoForm, self).__init__(*args, **kwargs)
+
+        if user:  # Make sure user is defined before using it
+            # Get teams where the user is the owner
+            owned_teams = Team.objects.filter(owner=user)
+            
+            # Get teams where the user is a member
+            member_teams = Team.objects.filter(teammember__user=user)
+            
+            # Merge both querysets and remove duplicates
+            self.fields['team'].queryset = (owned_teams | member_teams).distinct()
+
+            # Get users who are part of the selected teams
+            team_users = User.objects.filter(teammember__team__in=self.fields['team'].queryset).distinct()
+            self.fields['assigned'].queryset = team_users
 
 class TeamForm(forms.ModelForm):
     class Meta:
@@ -79,7 +110,7 @@ class MemberForm(forms.ModelForm):
     )
         
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)   
 
     #validation for making sure the email exists in the db, used documentation and AI
     def clean_email(self):

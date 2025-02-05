@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
-
+from .views import get_team_members
 urlpatterns = [
     path("", views.index, name="index"),
     path("about/", views.about, name="about"),
@@ -23,5 +23,7 @@ urlpatterns = [
     path("reset/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
     path("reset/done/", auth_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
     path("password-reset-sent/", views.password_reset_sent, name="password_reset_sent"),
+    # v1.3, added path to get team members when page reloads
+    path('get_team_members/<int:team_id>/', get_team_members, name='get_team_members'),
 
 ]

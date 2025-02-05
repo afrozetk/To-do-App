@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
+from django.http import JsonResponse
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -24,7 +25,6 @@ def index(request: HttpRequest) -> HttpResponse:
 
 def about(request: HttpRequest) -> HttpResponse:
     return render(request, "about.html")
-
 @login_required()
 def dashboard(request: HttpRequest) -> HttpResponse:
     """Displays the to-do list with category and team filters."""
@@ -37,7 +37,10 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     logger.info(f"Selected Category: {category_filter}")
     logger.info(f"Selected Team: {team_filter}")
 
-    # Fetch user's personal ToDo items
+    # Fetch personal todos owned by or assigned to the user:
+    # user_tasks = Todo.objects.filter(user=request.user) # Get tasks created by the user
+    # assigned_tasks = Todo.objects.filter(assigned=request.user) # Get tasks assigned to the user
+    # personal_todos = user_tasks | assigned_tasks
     personal_todos = Todo.objects.filter(user=request.user)
 
     # Get teams the user is part of and include tasks assigned to those teams
@@ -49,7 +52,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     # Filter team todos before union:
     filtered_team_todos = Todo.objects.none()  # Start with an empty QuerySet
     for user_member in users_teams:
-        current_team_todos = Todo.objects.filter(team=user_member.team).exclude(user=request.user)
+        current_team_todos = Todo.objects.filter(team=user_member.team, assigned=request.user).exclude(user=request.user)
         team_todos = team_todos.union(current_team_todos) # Keep track of all unfiltered team todos for this user.
 
         # Apply filters to team team todos before filtered union
@@ -69,14 +72,15 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     
     # Final union of both personal and team unfiltered querysets.
     todos = personal_todos.union(team_todos)
+    # todos = personal_todos
 
     # Final union of both filtered querysets.
     filtered_todos = filtered_personal_todos.union(filtered_team_todos)
+    # filtered_todos = filtered_personal_todos
 
     # Log final filtered results
-    logger.info(f"Filtered ToDos Count: {filtered_todos.count()}")
+    # logger.info(f"Filtered ToDos Count: {filtered_todos.count()}")
 
-    # Get unique categories and teams for dropdown filters:
     # Grab category values from the full unfiltered team/personal todos so we include all options.
     categories = todos.values_list('category', flat=True)
     teams = Team.objects.filter(teammember__user=request.user).values_list('name', flat=True).distinct()
@@ -89,27 +93,47 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         'selected_team': team_filter
     })
 
+# v1.3 added assigned field - edit to add assigned field pending
 @login_required()
 def todo_create(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
-        form = CreateTodoForm(request.POST, instance=Todo(user=request.user))
+        form = CreateTodoForm(request.POST, instance=Todo(user=request.user), user=request.user)
         if form.is_valid():
-            form.save()
+            todo=form.save(commit=False)
+            assigned_user = form.cleaned_data.get('assigned')
+            if assigned_user:
+                todo.assigned = assigned_user
+            todo.save()
             return redirect('dashboard')
     else:
-        form = CreateTodoForm()  
+        form = CreateTodoForm(user=request.user)  
     return render(request, 'create.html', {'form': form})
+
+
+@login_required
+def get_team_members(request, team_id):
+    team = get_object_or_404(Team, pk=team_id)
+    members = TeamMember.objects.filter(team=team).values('user__id', 'user__username') # Optimized query
+    member_list = [{'id': m['user__id'], 'username': m['user__username']} for m in members]
+    return JsonResponse(member_list, safe=False)
+
+ # v1.3 added assigned field - edit to add assigned field pending
 
 @login_required()
 def todo_edit(request, id):
     todo = get_object_or_404(Todo, id=id)
     if request.method == 'POST':
-        form = CreateTodoForm(request.POST, instance=todo)
+        form = CreateTodoForm(request.POST, instance=todo, user=request.user)
         if form.is_valid():
-            form.save()
+            todo=form.save(commit=False)
+            assigned_user = form.cleaned_data.get('assigned')
+            if assigned_user:
+                todo.assigned = assigned_user
+    
+            todo.save()
             return redirect('dashboard')
     else:
-        form = CreateTodoForm(instance=todo)
+        form = CreateTodoForm(instance=todo, user=request.user)
     return render(request, "edit.html", {'form': form, 'todo': todo})
 
 @login_required()
