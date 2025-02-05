@@ -43,37 +43,46 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     # Get teams the user is part of and include tasks assigned to those teams
     users_teams = TeamMember.objects.filter(user=request.user)
 
-    # Filter team todos before union
-    team_todos = Todo.objects.none()  # Start with an empty QuerySet
+    # Due to the order of operation on Django queries, I had to maintain a unfiltered copy.
+    team_todos = Todo.objects.none()  # Start with an empty QuerySet.
+
+    # Filter team todos before union:
+    filtered_team_todos = Todo.objects.none()  # Start with an empty QuerySet
     for user_member in users_teams:
-        filtered_team_todos = Todo.objects.filter(team=user_member.team).exclude(user=request.user)
+        current_team_todos = Todo.objects.filter(team=user_member.team).exclude(user=request.user)
+        team_todos = team_todos.union(current_team_todos) # Keep track of all unfiltered team todos for this user.
 
-        # Apply filters to team todos before union
+        # Apply filters to team team todos before filtered union
         if category_filter:
-            filtered_team_todos = filtered_team_todos.filter(category__iexact=category_filter)
+            current_team_todos = current_team_todos.filter(category__iexact=category_filter)
         if team_filter:
-            filtered_team_todos = filtered_team_todos.filter(team__name__iexact=team_filter)
+            current_team_todos = current_team_todos.filter(team__name__iexact=team_filter)
 
-        team_todos = team_todos.union(filtered_team_todos)
+        filtered_team_todos = filtered_team_todos.union(current_team_todos)
 
-    # Apply filters to personal todos before the union
+    # Apply filters to personal todos before the filtered union
+    filtered_personal_todos = personal_todos # Start with the unfiltered QuerySet
     if category_filter:
-        personal_todos = personal_todos.filter(category__iexact=category_filter)
+        filtered_personal_todos = filtered_personal_todos.filter(category__iexact=category_filter)
     if team_filter:
-        personal_todos = personal_todos.filter(team__name__iexact=team_filter)
-
-    # Final union of both filtered querysets
+        filtered_personal_todos = filtered_personal_todos.filter(team__name__iexact=team_filter)
+    
+    # Final union of both personal and team unfiltered querysets.
     todos = personal_todos.union(team_todos)
 
-    # Log final filtered results
-    logger.info(f"Filtered ToDos Count: {todos.count()}")
+    # Final union of both filtered querysets.
+    filtered_todos = filtered_personal_todos.union(filtered_team_todos)
 
-    # Get unique categories and teams for dropdown filters
-    categories = Todo.objects.filter(user=request.user).values_list('category', flat=True).distinct()
+    # Log final filtered results
+    logger.info(f"Filtered ToDos Count: {filtered_todos.count()}")
+
+    # Get unique categories and teams for dropdown filters:
+    # Grab category values from the full unfiltered team/personal todos so we include all options.
+    categories = todos.values_list('category', flat=True)
     teams = Team.objects.filter(teammember__user=request.user).values_list('name', flat=True).distinct()
 
     return render(request, 'dashboard.html', {
-        'todos': todos,
+        'todos': filtered_todos,
         'categories': categories,
         'teams': teams,
         'selected_category': category_filter,
