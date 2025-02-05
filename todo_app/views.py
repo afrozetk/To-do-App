@@ -160,6 +160,7 @@ def teamdetails(request: HttpRequest, pk: int) -> HttpResponse:
     members = TeamMember.objects.filter(team=team).exclude(user=team.owner)
 
     if request.method == 'POST':
+        # Create form model with the missing team foreign key so it validates properly.
         form = MemberForm(request.POST, instance=TeamMember(team=team))
         if form.is_valid():
             form.save()
@@ -184,14 +185,17 @@ def register_view(request):
         password = request.POST.get('new_password')
         confirm_password = request.POST.get('confirm_password')
 
+        # Validate that passwords match
         if password != confirm_password:
             messages.error(request, "Passwords do not match.")
             return render(request, 'register.html')
 
+        # Validate email uniqueness
         if User.objects.filter(username=email).exists():
             messages.error(request, "Email is already registered.")
             return render(request, 'register.html')
 
+        # Create the user
         try:
             user = User.objects.create_user(username=email, password=password)
             user.save()
@@ -212,13 +216,13 @@ def login_view(request):
         user = authenticate(request, username=email, password=password)
         if user:
             auth_login(request, user)
-            return redirect(next_redirect)  
+            return redirect(next_redirect) # Redirect the user back to their intended destination.
         else:
             messages.error(request, "Invalid email or password.")
             return render(request, "login.html", { 'next': next_redirect })  
 
     next_redirect = request.GET.get('next', 'dashboard')
-    return render(request, 'login.html', {'next': next_redirect})
+    return render(request, 'login.html', {'next': next_redirect}) # Stay on the login page if authentication fails.
 
 def forgot_password(request):
     """Handles password reset requests."""
@@ -228,10 +232,12 @@ def forgot_password(request):
         try:
             user = User.objects.filter(username=email).first()
             if user:
+                # Create a targeted reset url with user reference token:
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
                 token = default_token_generator.make_token(user)
                 reset_url = request.build_absolute_uri(reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": token}))
 
+                # Send out an email with the reset link to the user:
                 send_mail(
                     "Password Reset Request",
                     f"Click the link below to reset your password:\n\n{reset_url}",
@@ -239,7 +245,8 @@ def forgot_password(request):
                     [email],
                     fail_silently=False,
                 )
-                return redirect('password_reset_sent')
+                
+                return redirect('password_reset_sent') # Redirect to the new confirmation page
             else:
                 messages.error(request, "No account found with that email.")
         except Exception as e:
