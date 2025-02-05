@@ -3,14 +3,57 @@
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center mb-4">Your To-Do List</h1>
+
+    <!-- Filter Form -->
+    <form method="GET" action="{% url 'dashboard' %}" class="mb-4 d-flex flex-column align-items-center">
+        <div class="d-flex gap-3">
+            <!-- Category Filter -->
+            <div>
+                <label for="category" class="form-label">Filter by Category:</label>
+                <select name="category" id="category" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        {% if category != "" %}
+                            <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
+                                {{ category }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Team Filter -->
+            <div>
+                <label for="team" class="form-label">Filter by Team:</label>
+                <select name="team" id="team" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Teams</option>
+                    {% for team in teams %}
+                        <option value="{{ team }}" {% if team == selected_team %}selected{% endif %}>
+                            {{ team }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Reset Button -->
+            <div class="d-flex align-items-end gap-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Create ToDo Button -->
     <div class="d-flex justify-content-end">
-        <a href="{% url 'create' %}" class="btn btn-primary mb-3">Create ToDo</a>
+        <a href="{% url 'create' %}" class="btn btn-success mb-3">Create To-Do</a>
     </div>
 
-    {% for todo in todos %}
-        {% include "todo-card.html" %}
-    {% empty %}
-        <h5 class="text-center mb-2">No ToDo items found</h5>
-    {% endfor %}
+    <!-- To-Do List -->
+    <div>
+        {% for todo in todos %}
+            {% include "todo-card.html" %}
+        {% empty %}
+            <h5 class="text-center mb-2">No ToDo items found</h5>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
