@@ -54,42 +54,43 @@
                     document.addEventListener("DOMContentLoaded", function () {
                         const teamSelect = document.getElementById('id_team');
                         const assignedSelect = document.getElementById('id_assigned');
-
+                    
                         function updateAssignedOptions(selectedTeamId) {
                             if (selectedTeamId) {
                                 assignedSelect.disabled = false;
-
+                    
                                 fetch(`/get_team_members/${selectedTeamId}/`)
                                     .then(response => response.json())
                                     .then(members => {
                                         assignedSelect.innerHTML = ''; // Clear existing options
-
-                                        // Add team members only
+                    
                                         members.forEach(member => {
                                             let option = document.createElement('option');
                                             option.value = member.id;
-                                            option.text = member.username;
+                                            option.textContent = member.username;
                                             assignedSelect.appendChild(option);
                                         });
-
-                                        assignedSelect.selectedIndex = 0; // Default to first member
+                    
+                                        if (members.length === 0) {
+                                            assignedSelect.innerHTML = `<option value="" disabled selected>No members found</option>`;
+                                        }
                                     });
                             } else {
-                                // Reset to default user and disable
-                                assignedSelect.innerHTML = `<option value="{{ request.user.id }}" selected>{{ request.user.email }}</option>`;
+                                assignedSelect.innerHTML = `<option value="{{ request.user.id }}" selected>{{ request.user.username }}</option>`;
                                 assignedSelect.disabled = true;
                             }
                         }
-
-                        // Initialize based on default team value
+                    
+                        // Run when page loads
                         updateAssignedOptions(teamSelect.value);
-
-                        // Listen for changes
+                    
+                        // Update when team selection changes
                         teamSelect.addEventListener('change', function () {
                             updateAssignedOptions(this.value);
                         });
                     });
-                </script>
+                    </script>
+                    
                 <!-- Action Buttons -->
                 <div class="d-flex justify-content-end">
                     <button type="button" class="btn btn-danger"  onclick="window.location.href='{% url 'dashboard' %}'">Cancel</button>
