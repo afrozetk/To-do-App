@@ -1,3 +1,27 @@
+
+📝 To-Do App (Django + PostgreSQL)
+
+A full-stack task management app built with Django and PostgreSQL.
+Developed as part of CSC 394 - Software Projects at DePaul University.
+🚀 Features
+
+    User login, registration, and password reset
+
+    Create, edit, and delete personal or team tasks
+
+    Team creation and management
+
+    Responsive UI with custom CSS
+
+🛠 Tech Stack
+
+    Django (Python)
+
+    PostgreSQL
+
+    HTML / CSS / Bootstrap
+
+
 ### Building and running the application
 
 First configure a `.env` file based on the example shown in [.env.example](/.env.example)
@@ -10,8 +34,9 @@ changes into they running docker container to make testing changes easier:
 
 `docker compose up --build --watch`.
 
-
-The application will be available at http://127.0.0.1:8000.
+Visit http://127.0.0.1:8000/ to use the app!
 
 If you have any issue you can try to run the DB migrations:
 `docker compose run django-web python manage.py migrate`
+
+Developed by Afroze Kassam | DePaul University | Spring 2025
